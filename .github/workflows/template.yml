@@ -1,0 +1,119 @@
+name: Template
+
+# CI for the template itself. The workflows a *generated* repo gets live in
+# scaffold/github/workflows/ and are deliberately not run here — the HACS
+# validation in there would fail on a template that is not a HACS repo.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  reference:
+    name: Reference integration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Run tests
+        run: pytest tests/ -v
+
+      - name: Test the generator
+        run: pytest scripts/test_bootstrap.py -v
+
+      - name: Lint with Ruff
+        uses: astral-sh/ruff-action@v4.1.0
+
+      - name: Hassfest validation
+        uses: home-assistant/actions/hassfest@master
+
+  generated:
+    name: Generated (auth=${{ matrix.auth }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        auth: [none, credentials]
+    steps:
+      # The template lands in a subdirectory so the generated repo can take
+      # over the workspace root below: hassfest mounts ${{ github.workspace }}
+      # and takes no path input, so the only way to validate the output is to
+      # make it *be* the workspace — exactly as in a real carrier repo.
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          path: template
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: pip install -r template/requirements-dev.txt
+
+      # A carrier name with a space and mixed case, so the class-prefix and
+      # article handling get exercised rather than assumed.
+      - name: Bootstrap a carrier
+        run: |
+          python template/scripts/bootstrap.py \
+            --name "Acme Post" \
+            --domain acme_post \
+            --slug ha-acme-post \
+            --manufacturer "Acme Logistics" \
+            --auth ${{ matrix.auth }} \
+            --out "${{ runner.temp }}/generated"
+
+      - name: No template tokens survive
+        working-directory: ${{ runner.temp }}/generated
+        run: |
+          if grep -rIn --exclude-dir=__pycache__ \
+              -e 'example_carrier' -e 'Example Carrier' \
+              -e 'ExampleCarrier' -e 'variant:' .; then
+            echo "::error::template tokens or variant markers left in the output"
+            exit 1
+          fi
+
+      - name: Template-only files did not leak
+        working-directory: ${{ runner.temp }}/generated
+        run: |
+          for path in scaffold variants scripts docs; do
+            if [ -e "$path" ]; then
+              echo "::error::$path should not be in a generated repo"
+              exit 1
+            fi
+          done
+          test -f .github/workflows/validate.yml
+          test ! -f .github/workflows/template.yml
+
+      - name: Run the generated test suite
+        working-directory: ${{ runner.temp }}/generated
+        run: pytest tests/ -v
+
+      - name: Lint the generated repo with Ruff
+        working-directory: ${{ runner.temp }}/generated
+        run: |
+          pip install ruff
+          ruff check .
+
+      - name: Make the generated repo the workspace
+        run: |
+          rm -rf template
+          shopt -s dotglob
+          mv "${{ runner.temp }}/generated"/* .
+
+      - name: Hassfest validation
+        uses: home-assistant/actions/hassfest@master
