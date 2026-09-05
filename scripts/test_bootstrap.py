@@ -199,7 +199,6 @@ def test_generated_repo_wires_its_domain_into_the_suite_automation(tmp_path):
     assert suite == {
         "kind": "integration",
         "domain": "testy_post",
-        "research_api_path": "carrier-research/testy_post/api/",
     }
 
     for name in ("validate.yml", "release.yml"):
@@ -207,6 +206,3 @@ def test_generated_repo_wires_its_domain_into_the_suite_automation(tmp_path):
         assert "domain: testy_post" in workflow
         assert "example_carrier" not in workflow
         assert "ha-parcel-integrations/.github/.github/workflows/" in workflow
-
-    # The policy check reads this pointer out of CLAUDE.md.
-    assert suite["research_api_path"] in (out / "CLAUDE.md").read_text()

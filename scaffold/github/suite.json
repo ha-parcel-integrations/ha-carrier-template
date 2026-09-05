@@ -1,5 +1,4 @@
 {
   "kind": "integration",
-  "domain": "example_carrier",
-  "research_api_path": "carrier-research/example_carrier/api/"
+  "domain": "example_carrier"
 }
