@@ -7,6 +7,9 @@ Distributed via HACS; not part of HA core. One carrier in the
 notes* is suite-wide; when in doubt check the template or a sibling repo.
 No DTO layer.
 
+API mechanics — endpoints, parameters, status vocabularies — live in the
+private `carrier-research/example_carrier/api/` and are **never** copied here.
+
 ## Shared conventions — fetch when relevant
 
 Suite-wide rules live in

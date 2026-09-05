@@ -7,11 +7,15 @@ tool it no longer contains.
 Run with ``pytest scripts/test_bootstrap.py``.
 """
 
+import argparse
+import json
+
 import pytest
 from bootstrap import (
     class_prefix,
     copy_tree,
     fix_articles,
+    generate,
     prune_variant_blocks,
 )
 
@@ -173,3 +177,36 @@ def test_copy_tree_skips_template_only_at_the_root_only(tmp_path):
 
     assert not (dst / "docs").exists()
     assert (dst / "custom_components" / "docs" / "carrier.md").read_text() == "carrier"
+
+
+def test_generated_repo_wires_its_domain_into_the_suite_automation(tmp_path):
+    """The carrier repo only supplies its domain; the workflows live in ``.github``.
+
+    A domain that fails to substitute would silently test, cover and release the
+    wrong package, and nothing else in the generated repo would notice.
+    """
+    args = argparse.Namespace(
+        name="Testy Post",
+        domain="testy_post",
+        slug="ha-testy-post",
+        manufacturer="Testy Post",
+        auth="none",
+    )
+    out = tmp_path / "ha-testy-post"
+    generate(args, out)
+
+    suite = json.loads((out / ".github" / "suite.json").read_text())
+    assert suite == {
+        "kind": "integration",
+        "domain": "testy_post",
+        "research_api_path": "carrier-research/testy_post/api/",
+    }
+
+    for name in ("validate.yml", "release.yml"):
+        workflow = (out / ".github" / "workflows" / name).read_text()
+        assert "domain: testy_post" in workflow
+        assert "example_carrier" not in workflow
+        assert "ha-parcel-integrations/.github/.github/workflows/" in workflow
+
+    # The policy check reads this pointer out of CLAUDE.md.
+    assert suite["research_api_path"] in (out / "CLAUDE.md").read_text()
