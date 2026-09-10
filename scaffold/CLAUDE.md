@@ -62,7 +62,9 @@ you act in one of these areas:
 
 For code-based carriers, the options flow starts with exactly `Parcels` and
 `Settings`. `Parcels` is one editable multi-code list; `Settings` is
-a flat form. Changes apply without a restart. Two models, **do not mix them**:
+a flat form — some carriers use one sectioned form
+(`data_entry_flow.section`) instead; both are generator variants, not carrier
+decisions. Changes apply without a restart. Two models, **do not mix them**:
 - **Account-less carriers** (the default) apply changes live: an update listener
   calls `async_request_refresh()`, so added/removed parcel sensors appear
   immediately (this is also the resume path after polling has fully
@@ -74,8 +76,11 @@ a flat form. Changes apply without a restart. Two models, **do not mix them**:
 ## Dynamic polling
 
 There is no user-facing polling interval — this is a deliberate suite-wide
-choice, not a gap. `coordinator.py` recomputes `update_interval` at the end of
-every refresh:
+choice, not a gap. `coordinator.py`'s `_hottest_tier_minutes` /
+`_next_update_interval` recompute `update_interval` at the end of every
+refresh. Full algorithm and reasoning: `carrier-research/dynamic-polling.md`;
+`example_carrier/coordinator.py` is the canonical implementation every carrier
+mirrors.
 
 - **Quiet window:** no polling 00:00–06:00 local time, except two daily
   anchors (~00:00 and ~06:00) for overnight / end-of-day catch-up.
@@ -110,6 +115,7 @@ repo's own `CLAUDE.md` — not a generator flag.
 | `coordinator.py` (fetch, cache, event firing) | mostly not |
 | `config_flow.py` | partly (code validation) |
 | `sensor.py` / `button.py` / `calendar.py` / `device_trigger.py` | no |
+| `device.py` (shared device-info helper) | no |
 | `diagnostics.py` | partly (`TO_REDACT`) |
 | `services.py` (`track_parcel` / `untrack_parcel`, account-less only) | no |
 
