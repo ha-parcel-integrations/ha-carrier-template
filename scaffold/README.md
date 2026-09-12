@@ -9,7 +9,12 @@
 
 <!-- TODO(carrier): rewrite this paragraph, the Requirements and the Disclaimer for the real carrier — country, what a user needs, and whether an account is involved. -->
 
+<!-- >>> variant: auth-none -->
 A custom Home Assistant integration that tracks your [Example Carrier](https://example-carrier.test) parcels. No account is needed — you enter the tracking code yourself, just like on the Example Carrier website.
+<!-- <<< variant: auth-none -->
+<!-- >>> variant: auth-credentials -->
+A custom Home Assistant integration that tracks your [Example Carrier](https://example-carrier.test) parcels. Sign in with your own Example Carrier account and every parcel it already knows about is imported automatically.
+<!-- <<< variant: auth-credentials -->
 
 Part of the [ha-parcel-integrations](https://github.com/ha-parcel-integrations) family: it publishes the same canonical parcel format, statuses and events as the other carrier integrations, so it plugs straight into the [Parcel Aggregator](https://github.com/ha-parcel-integrations/ha-parcel-aggregator) and cross-carrier automations.
 
@@ -35,7 +40,12 @@ Part of the [ha-parcel-integrations](https://github.com/ha-parcel-integrations) 
 
 ## Features
 
+<!-- >>> variant: auth-none -->
 - Track any number of Example Carrier parcels by tracking code — no account needed
+<!-- <<< variant: auth-none -->
+<!-- >>> variant: auth-credentials -->
+- Auto-imports every parcel your Example Carrier account already knows about — no per-parcel setup
+<!-- <<< variant: auth-credentials -->
 - Per-parcel sensor with the canonical status (`registered` / `in_transit` / `out_for_delivery` / `delivered` / …), the carrier's own status text, the expected delivery window and a tracking deep-link
 - Summary sensors: incoming parcels, next delivery, recently delivered parcels
 - Read-only **Deliveries** calendar with the expected delivery windows
@@ -47,8 +57,14 @@ Part of the [ha-parcel-integrations](https://github.com/ha-parcel-integrations) 
 ## Requirements
 
 - Home Assistant 2024.12 or newer
+<!-- >>> variant: auth-none -->
 - An Example Carrier parcel and its tracking code (from the shipping
   confirmation email or the missed-delivery card) — no account needed
+<!-- <<< variant: auth-none -->
+<!-- >>> variant: auth-credentials -->
+- An Example Carrier account (the same one you use on the Example Carrier
+  website or app)
+<!-- <<< variant: auth-credentials -->
 
 ## Installation
 
@@ -64,7 +80,12 @@ Copy `custom_components/example_carrier` into your `config/custom_components/` f
 
 ## Configuration
 
+<!-- >>> variant: auth-none -->
 Add the integration via **Settings → Devices & Services → Add Integration → Example Carrier**. There is nothing to fill in: the hub is created immediately (Example Carrier tracking needs no account).
+<!-- <<< variant: auth-none -->
+<!-- >>> variant: auth-credentials -->
+Add the integration via **Settings → Devices & Services → Add Integration → Example Carrier** and sign in with your Example Carrier account email and password.
+<!-- <<< variant: auth-credentials -->
 
 Then add parcels via the integration's **Configure** dialog, the [`example_carrier.track_parcel`](#services) service, or a [dashboard button](examples/dashboards/add_parcel_card.yaml). The tracking code is on your shipping confirmation email or the missed-delivery card.
 

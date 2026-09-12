@@ -87,6 +87,18 @@ jobs:
             exit 1
           fi
 
+      - name: README matches auth mode
+        working-directory: ${{ runner.temp }}/generated
+        run: |
+          if [ "${{ matrix.auth }}" = "credentials" ] && grep -q "no account needed\|needs no account" README.md; then
+            echo "::error::credentials build's README still claims no account is needed"
+            exit 1
+          fi
+          if [ "${{ matrix.auth }}" = "none" ] && grep -qi "sign in with your own\|account email and password" README.md; then
+            echo "::error::account-less build's README talks about signing in with an account"
+            exit 1
+          fi
+
       - name: Template-only files did not leak
         working-directory: ${{ runner.temp }}/generated
         run: |
