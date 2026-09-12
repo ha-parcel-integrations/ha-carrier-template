@@ -88,9 +88,9 @@ not add one back in, even once the format is confirmed.
 There is no user-facing polling interval — this is a deliberate suite-wide
 choice, not a gap. `coordinator.py`'s `_hottest_tier_minutes` /
 `_next_update_interval` recompute `update_interval` at the end of every
-refresh. Full algorithm and reasoning: `carrier-research/dynamic-polling.md`;
-`example_carrier/coordinator.py` is the canonical implementation every carrier
-mirrors.
+refresh. `example_carrier/coordinator.py` is the canonical implementation
+every carrier mirrors; the design rationale (quiet window, tiers, stagger,
+backoff, delivered-skip) is spelled out below.
 
 - **Quiet window:** no polling 00:00–06:00 local time, except two daily
   anchors (~00:00 and ~06:00) for overnight / end-of-day catch-up.
