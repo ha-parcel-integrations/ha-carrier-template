@@ -70,11 +70,26 @@ async def test_track_parcel_normalizes_code(hass):
     ]
 
 
-async def test_track_parcel_rejects_invalid_code(hass):
+async def test_track_parcel_accepts_any_non_empty_code(hass):
+    """A short/odd-shaped code is accepted — formats vary too much to gate on."""
+    entry = await _setup(hass)
+    with patch(
+        "custom_components.example_carrier.api.ExampleCarrierApiClient.async_get_parcel",
+        new=AsyncMock(return_value=_SAMPLE),
+    ):
+        await hass.services.async_call(
+            DOMAIN, "track_parcel", {CONF_TRACKING_CODE: "abc"}, blocking=True
+        )
+        await hass.async_block_till_done()
+
+    assert entry.options[CONF_PARCELS] == [{CONF_TRACKING_CODE: "ABC"}]
+
+
+async def test_track_parcel_rejects_empty_code(hass):
     await _setup(hass)
     with pytest.raises(ServiceValidationError):
         await hass.services.async_call(
-            DOMAIN, "track_parcel", {CONF_TRACKING_CODE: "abc"}, blocking=True
+            DOMAIN, "track_parcel", {CONF_TRACKING_CODE: ""}, blocking=True
         )
 
 

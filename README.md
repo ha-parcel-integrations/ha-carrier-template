@@ -57,7 +57,7 @@ placeholder. The load-bearing ones:
 | `api.py` | The request and the response envelope |
 | `const.py` | Endpoint URLs, what you know about the endpoint, and `CAPABILITIES` (which optional contract fields this carrier actually populates — feeds the comparison table on the docs site; a carrier with more than one backend declares `CAPABILITIES_BY_VARIANT` instead — see the comment above it) |
 | `parcels.py` | `_STATUS_MAP` and the field lookups in `normalize_parcel` |
-| `config_flow.py` | The tracking-code format (or the credential fields) |
+| `config_flow.py` | The credential fields (`--auth credentials` only — the account-less variant accepts any non-empty tracking code by design, see `scaffold/CLAUDE.md`) |
 | `diagnostics.py` | The carrier's payload field names, in `TO_REDACT` |
 | `device.py` | The carrier's site, as the device's configuration URL |
 

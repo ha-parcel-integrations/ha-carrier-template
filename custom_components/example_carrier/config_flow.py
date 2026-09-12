@@ -30,18 +30,6 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-# TODO(carrier): tighten this to the carrier's real tracking-code format.
-#
-# A code as printed on the shipping confirmation or the missed-delivery card.
-# The default is deliberately generous (upper-case alphanumeric, 6-30 chars) so
-# it accepts anything; narrow it down once you know the format, because this
-# regex is also what the ``track_parcel`` service and the e-mail-parsing example
-# automation validate against. Keep it *permissive enough* that a valid code is
-# never rejected — a false negative is far more annoying than a bad code that
-# simply returns "not found" on the next poll.
-_TRACKING_CODE_RE = re.compile(r"^[A-Z0-9]{6,30}$")
-
-
 def normalize_tracking_code(value: str) -> str:
     """Return the tracking code upper-cased with separators stripped.
 
@@ -53,8 +41,15 @@ def normalize_tracking_code(value: str) -> str:
 
 
 def valid_tracking_code(value: str) -> bool:
-    """Whether ``value`` looks like a Example Carrier tracking code."""
-    return bool(_TRACKING_CODE_RE.match(value))
+    """Accept every non-empty code.
+
+    Carriers' real tracking-number formats vary too much, and often aren't
+    fully confirmed, to gate on a guessed shape — a false negative from a
+    too-strict regex is far more annoying than a bad code that simply comes
+    back "not found" on the next poll. Do not add a format regex here; this
+    is a suite-wide convention, not a per-carrier TODO.
+    """
+    return bool(value)
 
 
 def _current_parcels(entry: ConfigEntry) -> list[dict[str, str]]:

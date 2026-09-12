@@ -73,6 +73,16 @@ decisions. Changes apply without a restart. Two models, **do not mix them**:
   **no** update listener. Combining a listener with a reload-on-update flow is
   deprecated, an error in HA 2026.12+.
 
+## Tracking-code validation
+
+`valid_tracking_code` in `config_flow.py` accepts every non-empty code — no
+format regex. This is a suite-wide convention, not a per-carrier TODO: real
+tracking-number formats vary too much across carriers, and are often not
+fully confirmed even for this one, to gate on a guessed shape. A too-strict
+regex risks rejecting a genuinely valid code; an actually-bad code just comes
+back "not found" on the next poll, which is a far cheaper failure mode. Do
+not add one back in, even once the format is confirmed.
+
 ## Dynamic polling
 
 There is no user-facing polling interval — this is a deliberate suite-wide
