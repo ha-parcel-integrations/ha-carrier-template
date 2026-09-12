@@ -162,6 +162,11 @@ class ExampleCarrierCoordinator(DataUpdateCoordinator[list[dict]]):
         """Tier minutes computed on the last refresh (diagnostics only)."""
         return self._current_tier_minutes
 
+    @property
+    def delivered_codes(self) -> set[str]:
+        """Always empty — nothing per-parcel to skip in the account model."""
+        return set()
+
     def _device_id(self) -> str | None:
         """Resolve (and cache) this entry's device id for event payloads."""
         if self._cached_device_id is not None:

@@ -100,6 +100,16 @@ mirrors.
   `retry_after` — the carrier's own `Retry-After` header if present, otherwise
   an exponential backoff tracked per-coordinator. `api.py`'s
   `…ApiError.status_code` / `.retry_after` carry this from the HTTP layer.
+- **Delivered codes are skipped from the fetch (account-less carriers only):**
+  once a tracking code's payload comes back `delivered`, `coordinator.py`
+  excludes it from the next cycle's fetch — its payload can never change
+  again. `self._delivered_codes` (keyed on the tracking code, not the barcode)
+  is rebuilt from each cycle's results and intersected with the tracked set on
+  untrack. The code stays in the options list, keeps its sensor and its
+  cached payload, and still shows under the retention window — it just costs
+  no more requests. `coordinator.delivered_codes` surfaces the count in
+  diagnostics. Account-based carriers have nothing to skip here — one account
+  call already returns everything, so their `delivered_codes` is always empty.
 
 A carrier that genuinely throttles or soft-bans traffic harder than the 429
 backoff handles is a documented, local divergence from this in that one
