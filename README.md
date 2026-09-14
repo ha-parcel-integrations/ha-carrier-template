@@ -65,6 +65,12 @@ Plus `tests/payloads.py` (real, redacted responses), `CLAUDE.md`'s
 *Carrier-specific notes* section, the README's carrier paragraphs, the e-mail
 example's regex, and `brand/icon.png` — the generated one is a placeholder.
 
+The generated integration tracks **incoming parcels only**. If the carrier
+lets a consumer send a parcel too, add outgoing support as part of building
+it, not as a later feature — `scaffold/CLAUDE.md`'s *Incoming and outgoing
+parcels* section has the two models (derived from an account feed, or declared
+by the user on an account-less carrier) and the sensor/event shape they share.
+
 ## Repository layout
 
 | Path | Purpose |

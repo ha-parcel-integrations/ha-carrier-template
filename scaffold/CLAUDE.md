@@ -61,7 +61,9 @@ you act in one of these areas:
 ## Options and reloads
 
 For code-based carriers, the options flow starts with exactly `Parcels` and
-`Settings`. `Parcels` is one editable multi-code list; `Settings` is
+`Settings` — or, where the carrier supports outgoing parcels, `Incoming
+parcels` / `Outgoing parcels` / `Settings` (see the next section).
+`Parcels` is one editable multi-code list; `Settings` is
 a flat form — some carriers use one sectioned form
 (`data_entry_flow.section`) instead; both are generator variants, not carrier
 decisions. Changes apply without a restart. Two models, **do not mix them**:
@@ -72,6 +74,48 @@ decisions. Changes apply without a restart. Two models, **do not mix them**:
 - **Account-based carriers** call `async_schedule_reload` on submit and register
   **no** update listener. Combining a listener with a reload-on-update flow is
   deprecated, an error in HA 2026.12+.
+
+## Incoming and outgoing parcels
+
+**Add outgoing support whenever the carrier lets a consumer send a parcel** —
+a C2C shipment, a locker drop-off, a marketplace or returns label. It is not
+an optional extra to bolt on later: without it a parcel the user sent counts
+towards `incoming_active` and sits on their dashboard next to the ones they
+are waiting for. A carrier that genuinely has no consumer-sending surface is
+exempt — say so in *Carrier-specific notes* so the gap reads as a decision.
+
+Where the direction comes from has exactly two answers, and which one applies
+follows from the carrier, not from taste:
+
+- **Account-based** — the account feed distinguishes them, so derive it and
+  never ask the user. A shipment matching neither side logs a one-shot
+  warning and defaults to incoming rather than disappearing from every list.
+  References: `ha-ppl-cz` (one call, split on a field), `ha-dhl-nl` (a
+  separate "sent" endpoint).
+- **Account-less** — the payload cannot reveal it (the user's own parcel and
+  a stranger's look alike, and there is no account identity to compare a
+  party against), so the **user declares it per parcel**: two menu entries in
+  the options flow, each the same multi-code list, plus a `direction` field on
+  `track_parcel`. Store it as `CONF_DIRECTION` on the `CONF_PARCELS` dicts,
+  defaulting to incoming, so entries written before the option existed need no
+  migration. Re-filing a code under the other direction moves it instead of
+  erroring — that is the correction path. Reference: `ha-packeta`.
+  **Never infer direction from free-text event wording**: a handover sentence
+  that happens to name the drop-off point is not a structured field, says
+  nothing before handover, and silently ties the split to one locale.
+
+Above that split the shape is identical either way, and is suite-wide:
+`coordinator.outgoing` / `coordinator.delivered_outgoing` alongside `data` /
+`delivered`; `outgoing_parcels` + `outgoing_delivered_parcels` summary
+sensors (their unique_ids belong in `non_parcel_unique_ids`); per-parcel
+sensors spawned for **both** directions; the
+`<domain>_outgoing_parcel_status_changed` / `_outgoing_parcel_delivered`
+event pair, with **no** `registered` and no delivery-time event for outgoing;
+`awaiting_pickup`, `next_delivery` and the calendar staying incoming-only;
+and both new lists in `diagnostics.py`. The aggregator needs no change — it
+buckets on the sensor suffix and the event prefix. Also set
+`directions: incoming+outgoing` for the carrier in the docs site's
+`data/carriers.yml`.
 
 ## Tracking-code validation
 
