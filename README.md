@@ -1,7 +1,7 @@
 # ha-carrier-template
 
 The scaffold for a new carrier integration in the
-[ha-parcel-integrations](https://github.com/ha-parcel-integrations) suite.
+[ha-parcel-integrations](https://ha-parcel-integrations.io) suite.
 
 This repository is **a working, fully tested Home Assistant integration** for a
 fictional carrier (`example_carrier`). You do not copy files out of it by hand —
