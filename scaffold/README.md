@@ -15,6 +15,9 @@ A custom Home Assistant integration that tracks your [Example Carrier](https://e
 <!-- >>> variant: auth-credentials -->
 A custom Home Assistant integration that tracks your [Example Carrier](https://example-carrier.test) parcels. Sign in with your own Example Carrier account and every parcel it already knows about is imported automatically.
 <!-- <<< variant: auth-credentials -->
+<!-- >>> variant: auth-byo-key -->
+A custom Home Assistant integration that tracks your [Example Carrier](https://example-carrier.test) parcels through Example Carrier's official tracking API. Bring your own developer API key — you enter the tracking code yourself, just like the account-less variant.
+<!-- <<< variant: auth-byo-key -->
 
 Part of the [ha-parcel-integrations](https://github.com/ha-parcel-integrations) family: it publishes the same canonical parcel format, statuses and events as the other carrier integrations, so it plugs straight into the [Parcel Aggregator](https://github.com/ha-parcel-integrations/ha-parcel-aggregator) and cross-carrier automations.
 
@@ -46,6 +49,9 @@ Part of the [ha-parcel-integrations](https://github.com/ha-parcel-integrations) 
 <!-- >>> variant: auth-credentials -->
 - Auto-imports every parcel your Example Carrier account already knows about — no per-parcel setup
 <!-- <<< variant: auth-credentials -->
+<!-- >>> variant: auth-byo-key -->
+- Track any number of Example Carrier parcels by tracking code, through Example Carrier's official tracking API — bring your own developer key
+<!-- <<< variant: auth-byo-key -->
 - Per-parcel sensor with the canonical status (`registered` / `in_transit` / `out_for_delivery` / `delivered` / …), the carrier's own status text, the expected delivery window and a tracking deep-link
 - Summary sensors: incoming parcels, next delivery, recently delivered parcels
 - Read-only **Deliveries** calendar with the expected delivery windows
@@ -65,6 +71,10 @@ Part of the [ha-parcel-integrations](https://github.com/ha-parcel-integrations) 
 - An Example Carrier account (the same one you use on the Example Carrier
   website or app)
 <!-- <<< variant: auth-credentials -->
+<!-- >>> variant: auth-byo-key -->
+- Your own Example Carrier developer API key ([register here](https://example-carrier.test)) and an
+  Example Carrier tracking code — no consumer account needed
+<!-- <<< variant: auth-byo-key -->
 
 ## Installation
 
@@ -86,6 +96,9 @@ Add the integration via **Settings → Devices & Services → Add Integration �
 <!-- >>> variant: auth-credentials -->
 Add the integration via **Settings → Devices & Services → Add Integration → Example Carrier** and sign in with your Example Carrier account email and password.
 <!-- <<< variant: auth-credentials -->
+<!-- >>> variant: auth-byo-key -->
+Add the integration via **Settings → Devices & Services → Add Integration → Example Carrier** and enter your own Example Carrier developer API key.
+<!-- <<< variant: auth-byo-key -->
 
 Then add parcels via the integration's **Configure** dialog, the [`example_carrier.track_parcel`](#services) service, or a [dashboard button](examples/dashboards/add_parcel_card.yaml). The tracking code is on your shipping confirmation email or the missed-delivery card.
 
@@ -196,7 +209,15 @@ statuses and events.
 
 ## Disclaimer
 
+<!-- >>> variant: auth-byo-key -->
+This integration uses Example Carrier's official tracking API, through a developer API key you provide yourself. It is not affiliated with, endorsed by, or supported by Example Carrier.
+<!-- <<< variant: auth-byo-key -->
+<!-- >>> variant: auth-none -->
 This integration uses the same public tracking endpoint as the Example Carrier consumer website. It is not affiliated with, endorsed by, or supported by Example Carrier.
+<!-- <<< variant: auth-none -->
+<!-- >>> variant: auth-credentials -->
+This integration uses the same public tracking endpoint as the Example Carrier consumer website. It is not affiliated with, endorsed by, or supported by Example Carrier.
+<!-- <<< variant: auth-credentials -->
 
 ## Contributing
 

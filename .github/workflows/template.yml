@@ -46,7 +46,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        auth: [none, credentials]
+        auth: [none, credentials, byo-key]
     steps:
       # The template lands in a subdirectory so the generated repo can take
       # over the workspace root below: hassfest mounts ${{ github.workspace }}
@@ -94,8 +94,12 @@ jobs:
             echo "::error::credentials build's README still claims no account is needed"
             exit 1
           fi
-          if [ "${{ matrix.auth }}" = "none" ] && grep -qi "sign in with your own\|account email and password" README.md; then
-            echo "::error::account-less build's README talks about signing in with an account"
+          if [ "${{ matrix.auth }}" = "none" ] && grep -qi "sign in with your own\|account email and password\|developer API key" README.md; then
+            echo "::error::account-less build's README talks about signing in with an account or a key"
+            exit 1
+          fi
+          if [ "${{ matrix.auth }}" = "byo-key" ] && ! grep -qi "developer API key" README.md; then
+            echo "::error::byo-key build's README doesn't mention the API key"
             exit 1
           fi
 

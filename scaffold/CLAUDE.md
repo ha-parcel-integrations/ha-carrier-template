@@ -67,13 +67,36 @@ parcels` / `Outgoing parcels` / `Settings` (see the next section).
 a flat form — some carriers use one sectioned form
 (`data_entry_flow.section`) instead; both are generator variants, not carrier
 decisions. Changes apply without a restart. Two models, **do not mix them**:
-- **Account-less carriers** (the default) apply changes live: an update listener
-  calls `async_request_refresh()`, so added/removed parcel sensors appear
-  immediately (this is also the resume path after polling has fully
-  suspended — see "Dynamic polling" below).
+- **Account-less carriers** (the default, and the `--auth byo-key` build) apply
+  changes live: an update listener calls `async_request_refresh()`, so
+  added/removed parcel sensors appear immediately (this is also the resume
+  path after polling has fully suspended — see "Dynamic polling" below).
 - **Account-based carriers** call `async_schedule_reload` on submit and register
   **no** update listener. Combining a listener with a reload-on-update flow is
   deprecated, an error in HA 2026.12+.
+
+## Auth models
+
+Three `--auth` builds, one axis: **what the config flow asks for and
+validates**, not how tracking works. `none` and `byo-key` both key tracking on
+codes the user types in (`Parcels`/`Settings` options, `track_parcel` /
+`untrack_parcel` services, the account-less coordinator and its full-stop /
+delivered-skip behaviour below) — `byo-key` only adds a required key field
+validated against the carrier's **official** API at setup, `CONF_API_KEY` in
+`entry.data`, and a reauth flow for when the key is rotated or revoked outside
+Home Assistant (`ExampleCarrierAuthError` from any per-parcel fetch raises
+`ConfigEntryAuthFailed` for the whole poll — one credential covers every
+tracked code, so a rejected key is never treated as one parcel's problem).
+`credentials` is the only one that changes the *tracking* model too (an
+account feed, not user-entered codes) — see the split above.
+
+Reach for `byo-key` only when carrier-research has already established that
+the carrier's *unauthenticated/consumer* surface is unusable (bot-walled,
+requires a session a script can't hold) and that the *official* developer key
+is reachable by a private individual — `key_access: consumer` in the research
+doc's front matter, not `business`. A `business`-gated key is a wall, not a
+BYO key, whatever the portal's own copy claims (see
+`carrier-research/CLAUDE.md`'s "Standing rulings").
 
 ## Incoming and outgoing parcels
 
@@ -177,7 +200,7 @@ repo's own `CLAUDE.md` — not a generator flag.
 | `const.py` (domain, URLs, `ParcelStatus`, option keys) | partly (URLs) |
 | `parcels.py` (status map, `normalize_parcel`, history, sort, filters — pure, no I/O) | partly (`_STATUS_MAP`, `normalize_parcel`) |
 | `coordinator.py` (fetch, cache, event firing) | mostly not |
-| `config_flow.py` | partly (code validation) |
+| `config_flow.py` | partly (code validation; key/credential validation on `--auth byo-key`/`credentials`) |
 | `sensor.py` / `button.py` / `calendar.py` / `device_trigger.py` | no |
 | `device.py` (shared device-info helper) | no |
 | `diagnostics.py` | partly (`TO_REDACT`) |

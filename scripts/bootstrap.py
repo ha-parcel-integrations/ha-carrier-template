@@ -6,15 +6,16 @@
 
 Three things happen, in this order:
 
-1. **Overlay** — with ``--auth credentials`` the files under
-   ``variants/credentials/`` replace their counterparts, and the paths listed
-   in that variant's ``remove.txt`` are deleted.
+1. **Overlay** — with ``--auth credentials`` or ``--auth byo-key`` the files
+   under ``variants/credentials/`` or ``variants/byo-key/`` replace their
+   counterparts, and the paths listed in that variant's ``remove.txt`` (if any)
+   are deleted.
 2. **Variant blocks** — lines between ``>>> variant: <tag>`` and
    ``<<< variant: <tag>`` markers are kept (markers stripped) when the tag is
    active for this build, and deleted otherwise. Used for a handful of
    scattered lines that differ, where a whole-file overlay would be overkill.
-   Only the ``auth-<none|credentials>`` axis is active today; polling is no
-   longer one of these — dynamic polling (see scaffold/CLAUDE.md) is
+   Only the ``auth-<none|credentials|byo-key>`` axis is active today; polling
+   is no longer one of these — dynamic polling (see scaffold/CLAUDE.md) is
    unconditional, with nothing left for a build flag to select between.
 3. **Tokens** — ``example_carrier`` / ``ExampleCarrier`` / ``Example Carrier``
    / ``ha-example-carrier`` are replaced in file *contents* and in path names.
@@ -81,9 +82,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--manufacturer", help="Device manufacturer (defaults to --name)")
     parser.add_argument(
         "--auth",
-        choices=("none", "credentials"),
+        choices=("none", "credentials", "byo-key"),
         default="none",
-        help="none: tracking codes entered by the user. credentials: account login + reauth.",
+        help=(
+            "none: tracking codes entered by the user. credentials: account "
+            "login + reauth. byo-key: user's own developer API key + reauth, "
+            "tracking codes still entered by the user."
+        ),
     )
     parser.add_argument("--out", required=True, help="Where to write the new repo")
     parser.add_argument(
@@ -281,8 +286,9 @@ def finalise_manifest(out: Path, args: argparse.Namespace) -> None:
     manifest = out / "custom_components" / args.domain / "manifest.json"
     data = json.loads(manifest.read_text(encoding="utf-8"))
     data["version"] = "0.1.0"
-    if args.auth == "none":
-        # No account and no postcode: nothing to key a second hub on.
+    if args.auth in ("none", "byo-key"):
+        # No account (an API key is not one) and no postcode: nothing to key
+        # a second hub on either way.
         data["single_config_entry"] = True
     else:
         data.pop("single_config_entry", None)
@@ -368,8 +374,8 @@ def generate(args: argparse.Namespace, out: Path) -> dict[str, list[str]]:
 
     replaced: list[str] = []
     removed: list[str] = []
-    if args.auth == "credentials":
-        overlay = TEMPLATE_ROOT / "variants" / "credentials"
+    if args.auth != "none":
+        overlay = TEMPLATE_ROOT / "variants" / args.auth
         replaced = apply_overlay(out, overlay)
         removed = apply_removals(out, overlay / "remove.txt")
 

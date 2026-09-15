@@ -31,13 +31,23 @@ python scripts/bootstrap.py \
 | `--domain` | snake_case | HA domain and the `custom_components/<domain>` folder |
 | `--slug` | kebab-case, `ha-`-prefixed | Repo name (`ha-cainiao`, **not** `cainiao`), used in documentation and issue URLs |
 | `--manufacturer` | free text | Device-registry manufacturer (defaults to `--name`) |
-| `--auth` | `none`, `credentials` | Account-less tracking-code model, or username/password with reauth |
+| `--auth` | `none`, `credentials`, `byo-key` | Account-less tracking-code model; username/password with reauth; or the user's own developer API key with reauth, tracking codes still entered by hand |
 | `--out` | path | Where to write the new repo (must not exist) |
 
 Pick `--auth credentials` when the carrier has consumer accounts with a parcel
 feed; that swaps in login, reauth and a list endpoint, and drops the
 `track_parcel` services (there is nothing to track manually — the account
-already knows).
+already knows). Pick `--auth byo-key` when the carrier only tracks reliably
+through its **official** developer API — no consumer account, but the user
+registers for their own key and pastes it in; that swaps in a key field,
+validation and reauth in the config flow, while keeping the account-less
+tracking-code model and the `track_parcel` services (an official API still has
+no parcel feed to auto-import from). Only reach for it once a research pass
+has actually found the unofficial/consumer route walled off — see
+`carrier-research/CLAUDE.md`'s "Standing rulings" for when a BYO key is
+accepted at all, and record `key_access: consumer` there before building, not
+`business` (a key gated behind a business/VAT/SIRET identity is a wall, not a
+BYO key — FedEx and UPS both sit there, parked).
 
 Polling is not a flag: every generated carrier gets the same dynamic,
 status-driven cadence (quiet window, two daily anchors, hot/mid tiers, an
@@ -57,7 +67,7 @@ placeholder. The load-bearing ones:
 | `api.py` | The request and the response envelope |
 | `const.py` | Endpoint URLs, what you know about the endpoint, and `CAPABILITIES` (which optional contract fields this carrier actually populates — feeds the comparison table on the docs site; a carrier with more than one backend declares `CAPABILITIES_BY_VARIANT` instead — see the comment above it) |
 | `parcels.py` | `_STATUS_MAP` and the field lookups in `normalize_parcel` |
-| `config_flow.py` | The credential fields (`--auth credentials` only — the account-less variant accepts any non-empty tracking code by design, see `scaffold/CLAUDE.md`) |
+| `config_flow.py` | The credential or API-key fields (`--auth credentials`/`--auth byo-key` only — the account-less variant accepts any non-empty tracking code by design, see `scaffold/CLAUDE.md`) |
 | `diagnostics.py` | The carrier's payload field names, in `TO_REDACT` |
 | `device.py` | The carrier's site, as the device's configuration URL |
 
@@ -78,6 +88,7 @@ by the user on an account-less carrier) and the sensor/event shape they share.
 | `custom_components/example_carrier/` | The reference integration — account-less |
 | `tests/` | Its test suite (98% coverage) |
 | `variants/credentials/` | Overlay applied for `--auth credentials` |
+| `variants/byo-key/` | Overlay applied for `--auth byo-key` |
 | `scaffold/` | The generated repo's `README.md`, `CLAUDE.md` and `.github/` |
 | `examples/`, `hacs.json`, `pytest.ini`, … | Copied through as-is |
 | `scripts/bootstrap.py` | The generator |
@@ -87,16 +98,16 @@ by the user on an account-less carrier) and the sensor/event shape they share.
 `.github/` are template-only — the generator does not copy them into the new
 repo.
 
-Two mechanisms shape the output. Whole files that differ between the account
-models come from the **overlay** in `variants/credentials/`. Smaller, scattered
-differences use **variant markers** instead — `# >>> variant: <tag>` /
-`# <<< variant: <tag>` (or `<!-- -->` in Markdown) — because an overlay for a
-handful of lines would mean maintaining two near-identical copies of a file.
-An active block keeps its body and loses its markers; an inactive one is
-deleted. Only the `auth-<none|credentials>` axis is active today — the polling
-axis these markers used to carry was retired when dynamic polling became
-unconditional (see `scaffold/CLAUDE.md`). The mechanism stays for the next
-axis that needs it.
+Two mechanisms shape the output. Whole files that differ between auth models
+come from the **overlay** in `variants/credentials/` or `variants/byo-key/`.
+Smaller, scattered differences use **variant markers** instead — `# >>>
+variant: <tag>` / `# <<< variant: <tag>` (or `<!-- -->` in Markdown) — because
+an overlay for a handful of lines would mean maintaining two near-identical
+copies of a file. An active block keeps its body and loses its markers; an
+inactive one is deleted. Only the `auth-<none|credentials|byo-key>` axis is
+active today — the polling axis these markers used to carry was retired when
+dynamic polling became unconditional (see `scaffold/CLAUDE.md`). The mechanism
+stays for the next axis that needs it.
 
 ## Working on the template itself
 

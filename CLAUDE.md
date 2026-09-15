@@ -62,18 +62,20 @@ Samples live in `tests/payloads.py`, not inline in test modules.
 
 ## The two variant mechanisms
 
-**Overlay** — `variants/credentials/` mirrors the paths it replaces, so
+**Overlay** — `variants/<auth>/` mirrors the paths it replaces, so
 `variants/credentials/custom_components/example_carrier/api.py` overwrites
-`custom_components/example_carrier/api.py`. `variants/credentials/remove.txt`
+`custom_components/example_carrier/api.py`. `variants/<auth>/remove.txt`
 lists paths deleted after the overlay is applied (one per line, `#` comments
-allowed). Use this when a whole file differs.
+allowed) — optional; `variants/byo-key/` has nothing to remove, since it keeps
+the account-less `track_parcel`/`untrack_parcel` services. Use an overlay when
+a whole file differs.
 
 **Variant markers** — `# >>> variant: <tag>` … `# <<< variant: <tag>` (or
 `<!-- >>> variant: <tag> -->` in Markdown). Use this when a handful of
 scattered lines differ, where an overlay would mean maintaining two
 near-identical copies of a file. Blocks may not nest or overlap —
-`bootstrap.py` raises rather than guessing. `auth-<none|credentials>` is the
-only axis active today; the polling axis these markers used to carry
+`bootstrap.py` raises rather than guessing. `auth-<none|credentials|byo-key>`
+is the only axis active today; the polling axis these markers used to carry
 (`interval-<configurable|fixed>`) was retired when dynamic, status-driven
 polling became unconditional — see scaffold/CLAUDE.md's "Dynamic polling"
 section. The mechanism itself stays, for the next axis that needs it.
