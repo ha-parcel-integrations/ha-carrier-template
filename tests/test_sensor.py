@@ -4,7 +4,9 @@ from unittest.mock import MagicMock
 
 from custom_components.example_carrier.const import ParcelStatus
 from custom_components.example_carrier.sensor import (
+    ExampleCarrierAwaitingPickupSensor,
     ExampleCarrierDeliveredParcelsSensor,
+    ExampleCarrierEnRouteToPickupPointSensor,
     ExampleCarrierIncomingParcelsSensor,
     ExampleCarrierLastUpdateSensor,
     ExampleCarrierNextDeliverySensor,
@@ -85,6 +87,29 @@ def test_next_delivery_skips_unparseable_moment():
     ])
     sensor = ExampleCarrierNextDeliverySensor(coordinator, _entry())
     assert sensor.extra_state_attributes["barcode"] == "B"
+
+
+def test_en_route_and_awaiting_pickup_split():
+    parcels = [
+        _parcel("EN_ROUTE", pickup=True),
+        _parcel("READY", pickup=True, status=ParcelStatus.AT_PICKUP_POINT),
+        _parcel("HOME"),
+    ]
+    en_route = ExampleCarrierEnRouteToPickupPointSensor(_coordinator(parcels), _entry())
+    awaiting = ExampleCarrierAwaitingPickupSensor(_coordinator(parcels), _entry())
+    assert en_route.unique_id == "e1_en_route_to_pickup_point"
+    assert awaiting.unique_id == "e1_awaiting_pickup"
+    assert [p["barcode"] for p in en_route.extra_state_attributes["parcels"]] == ["EN_ROUTE"]
+    assert [p["barcode"] for p in awaiting.extra_state_attributes["parcels"]] == ["READY"]
+    assert en_route.native_value == 1
+    assert awaiting.native_value == 1
+
+
+def test_pickup_sensors_zero_without_data():
+    coordinator = _coordinator([])
+    coordinator.data = None
+    assert ExampleCarrierEnRouteToPickupPointSensor(coordinator, _entry()).native_value == 0
+    assert ExampleCarrierAwaitingPickupSensor(coordinator, _entry()).native_value == 0
 
 
 def test_delivered_sensor():

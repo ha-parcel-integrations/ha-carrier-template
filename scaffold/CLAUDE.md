@@ -35,12 +35,13 @@ you act in one of these areas:
   summary+diagnostic sensors. Add a new non-parcel sensor's unique_id to the set.
 - **Per-parcel sensors are removed by the summary sensor** via
   `entity_registry.async_remove` (self-removal races and leaves ghosts).
-- **If this carrier can reach `ParcelStatus.AT_PICKUP_POINT` from a real raw
-  status/code**, it needs an `awaiting_pickup` sensor — see *Parcel contract*
-  in `CONVENTIONS.md`. Say "pickup point", not "ServicePoint"/"parcel
-  shop"/"locker", for the generic concept. `ha-dhl-nl`, `ha-dpd`, `ha-gls`,
-  `ha-inpost` are reference implementations; `example_carrier` here does not
-  demonstrate it yet.
+- **The optional pickup-point summaries are a pair.** A carrier that can tell
+  a parcel is destined for a pickup point exposes
+  `en_route_to_pickup_point` for `pickup is true` before it arrives; one that
+  can reach `ParcelStatus.AT_PICKUP_POINT` also exposes `awaiting_pickup`.
+  See *Parcel contract* in `CONVENTIONS.md`. Say "pickup point", not
+  "ServicePoint"/"parcel shop"/"locker", for the generic concept; the
+  example carrier demonstrates both canonical sensors.
 
 ## Carrier-specific notes
 
