@@ -15,6 +15,7 @@ from custom_components.example_carrier.const import (
     CONF_DELIVERED_FILTER_TYPE,
     DOMAIN,
     KNOWN_CAPABILITIES,
+    PENDING_CAPABILITIES,
     ParcelStatus,
 )
 from custom_components.example_carrier.parcels import (
@@ -181,6 +182,12 @@ def test_normalize_publishes_exactly_the_canonical_keys():
 def test_capabilities_are_known_values():
     """A typo here would silently misreport this carrier on the docs site."""
     assert CAPABILITIES <= KNOWN_CAPABILITIES
+    assert PENDING_CAPABILITIES <= KNOWN_CAPABILITIES
+
+
+def test_a_capability_is_never_both_populated_and_pending():
+    """The docs site would have to pick one; "awaiting data" must not hide a confirmed field."""
+    assert not CAPABILITIES & PENDING_CAPABILITIES
 
 
 def test_capabilities_match_what_normalize_parcel_actually_returns():

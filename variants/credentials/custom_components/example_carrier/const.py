@@ -54,6 +54,17 @@ CAPABILITIES = frozenset(
     {"weight", "dimensions", "delivery_window", "pickup_point", "url", "history"}
 )
 
+# Fields whose support is not confirmed yet — typically a carrier built without
+# a real parcel to check against. Leave this empty once the open questions are
+# answered. A field is in exactly one of three states: in CAPABILITIES (seen
+# populated), in PENDING_CAPABILITIES (docs site shows "awaiting data"), or in
+# neither (the API never exposes it). Pending fields must still come back as a
+# literal ``None`` from normalize_parcel() until they are confirmed and moved
+# into CAPABILITIES. A multi-backend carrier declares
+# PENDING_CAPABILITIES_BY_VARIANT with the same keys as its
+# CAPABILITIES_BY_VARIANT instead (omit backends with nothing pending).
+PENDING_CAPABILITIES: frozenset[str] = frozenset()
+
 # If this carrier ever grows a second backend with a genuinely different
 # payload shape (a country-specific API, not just a config option), replace
 # the single CAPABILITIES above with a CAPABILITIES_BY_VARIANT dict instead:
