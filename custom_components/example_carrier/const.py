@@ -108,7 +108,7 @@ DEFAULT_DELIVERED_FILTER_TYPE = "days"
 DEFAULT_DELIVERED_FILTER_AMOUNT = 7
 
 # Dynamic, status-driven polling — unconditional across the suite, no
-# user-facing interval option (see scaffold/CLAUDE.md's "Dynamic polling"
+# user-facing interval option (see CLAUDE.md's "Dynamic polling"
 # section for the full algorithm and the reasoning behind it).
 #
 # Quiet window: no polling between these local hours except the two anchors
