@@ -7,8 +7,9 @@ line-length = 88
 target-version = "py312"
 
 [lint]
-# pydocstyle (D) + pycodestyle errors/warnings (E/W) + pyflakes (F) + isort (I).
-select = ["D", "E", "F", "W", "I"]
+# pydocstyle (D) + pycodestyle errors/warnings (E/W) + pyflakes (F) + isort (I)
+# + flake8-async (ASYNC: blocking calls on the event loop, also enforced in CI).
+select = ["ASYNC", "D", "E", "F", "W", "I"]
 ignore = [
     # Home Assistant's pydocstyle ignores (conflicting / non-required rules).
     "D202",  # no blank lines allowed after function docstring
