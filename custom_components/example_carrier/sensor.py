@@ -1,8 +1,9 @@
 """Sensor platform for the Example Carrier parcel tracker integration."""
+
 from __future__ import annotations
 
-import logging
 from datetime import datetime
+import logging
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -30,7 +31,6 @@ _LOGGER = logging.getLogger(__name__)
 PARALLEL_UPDATES = 0
 
 
-
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ExampleCarrierConfigEntry,
@@ -42,9 +42,7 @@ async def async_setup_entry(
     # than (too late) from this forwarded platform.
     coordinator = entry.runtime_data.coordinator
 
-    current_barcodes: set[str] = {
-        p.get("barcode", "") for p in coordinator.data or []
-    }
+    current_barcodes: set[str] = {p.get("barcode", "") for p in coordinator.data or []}
     entry_id = entry.entry_id
 
     # Remove per-parcel sensors from the registry whose barcode is no longer
@@ -66,7 +64,7 @@ async def async_setup_entry(
             and entity_entry.unique_id.startswith(f"{entry_id}_")
             and entity_entry.unique_id not in non_parcel_unique_ids
         ):
-            barcode = entity_entry.unique_id[len(f"{entry_id}_"):]
+            barcode = entity_entry.unique_id[len(f"{entry_id}_") :]
             if barcode not in current_barcodes:
                 registry.async_remove(entity_entry.entity_id)
 
@@ -75,10 +73,10 @@ async def async_setup_entry(
             coordinator, entry, async_add_entities, current_barcodes
         ),
     ]
-    for parcel in coordinator.data or []:
-        entities.append(
-            ExampleCarrierParcelSensor(coordinator, entry, parcel.get("barcode", ""))
-        )
+    entities.extend(
+        ExampleCarrierParcelSensor(coordinator, entry, parcel.get("barcode", ""))
+        for parcel in coordinator.data or []
+    )
     entities.append(ExampleCarrierNextDeliverySensor(coordinator, entry))
     entities.append(ExampleCarrierEnRouteToPickupPointSensor(coordinator, entry))
     entities.append(ExampleCarrierAwaitingPickupSensor(coordinator, entry))
@@ -155,7 +153,9 @@ class ExampleCarrierIncomingParcelsSensor(
         super()._handle_coordinator_update()
 
 
-class ExampleCarrierParcelSensor(CoordinatorEntity[ExampleCarrierCoordinator], SensorEntity):
+class ExampleCarrierParcelSensor(
+    CoordinatorEntity[ExampleCarrierCoordinator], SensorEntity
+):
     """Per-parcel sensor reporting the status of one tracked Example Carrier parcel."""
 
     _attr_has_entity_name = True
@@ -253,6 +253,7 @@ class _ExampleCarrierPickupListSensor(
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_attribution = ATTRIBUTION
     _unrecorded_attributes = frozenset({"parcels"})
+    _suffix: str
 
     def __init__(
         self, coordinator: ExampleCarrierCoordinator, entry: ConfigEntry
@@ -269,6 +270,9 @@ class _ExampleCarrierPickupListSensor(
     def extra_state_attributes(self) -> dict[str, Any]:
         return {"parcels": self._parcels()}
 
+    def _parcels(self) -> list[dict]:
+        raise NotImplementedError
+
 
 class ExampleCarrierEnRouteToPickupPointSensor(_ExampleCarrierPickupListSensor):
     """Active parcels destined for, but not yet at, a pickup point."""
@@ -278,7 +282,8 @@ class ExampleCarrierEnRouteToPickupPointSensor(_ExampleCarrierPickupListSensor):
 
     def _parcels(self) -> list[dict]:
         return [
-            parcel for parcel in (self.coordinator.data or [])
+            parcel
+            for parcel in (self.coordinator.data or [])
             if parcel.get("pickup")
             and parcel.get("status") != ParcelStatus.AT_PICKUP_POINT
         ]
@@ -292,7 +297,8 @@ class ExampleCarrierAwaitingPickupSensor(_ExampleCarrierPickupListSensor):
 
     def _parcels(self) -> list[dict]:
         return [
-            parcel for parcel in (self.coordinator.data or [])
+            parcel
+            for parcel in (self.coordinator.data or [])
             if parcel.get("status") == ParcelStatus.AT_PICKUP_POINT
         ]
 

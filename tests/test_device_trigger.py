@@ -1,4 +1,5 @@
 """Tests for Example Carrier device triggers."""
+
 from unittest.mock import AsyncMock
 
 from custom_components.example_carrier.const import DOMAIN

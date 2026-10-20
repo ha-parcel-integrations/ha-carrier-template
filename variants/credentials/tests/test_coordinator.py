@@ -2,10 +2,12 @@
 
 The parcel mapping itself is covered by ``test_parcels.py``.
 """
+
 from unittest.mock import AsyncMock
 
-import pytest
 from homeassistant.exceptions import ConfigEntryAuthFailed
+from homeassistant.helpers import device_registry as dr
+import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.example_carrier.api import ExampleCarrierAuthError
@@ -114,8 +116,6 @@ async def test_first_refresh_fires_nothing(hass):
 
 
 async def test_event_carries_device_id(hass):
-    from homeassistant.helpers import device_registry as dr
-
     entry = _entry()
     entry.add_to_hass(hass)
     device = dr.async_get(hass).async_get_or_create(
@@ -126,9 +126,7 @@ async def test_event_carries_device_id(hass):
     coordinator = ExampleCarrierCoordinator(hass, client, entry)
 
     events = []
-    hass.bus.async_listen(
-        f"{DOMAIN}_parcel_status_changed", lambda e: events.append(e)
-    )
+    hass.bus.async_listen(f"{DOMAIN}_parcel_status_changed", lambda e: events.append(e))
 
     client.async_get_parcels.return_value = [_in_transit()]
     await coordinator._async_update_data()
@@ -146,9 +144,7 @@ async def test_fires_status_changed_event(hass):
     coordinator = ExampleCarrierCoordinator(hass, client, entry)
 
     events = []
-    hass.bus.async_listen(
-        f"{DOMAIN}_parcel_status_changed", lambda e: events.append(e)
-    )
+    hass.bus.async_listen(f"{DOMAIN}_parcel_status_changed", lambda e: events.append(e))
 
     client.async_get_parcels.return_value = [_in_transit()]
     await coordinator._async_update_data()  # first refresh: suppressed

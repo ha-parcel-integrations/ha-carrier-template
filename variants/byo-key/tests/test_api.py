@@ -1,4 +1,5 @@
 """Tests for the Example Carrier API client."""
+
 import json
 from unittest.mock import AsyncMock, MagicMock
 
@@ -74,7 +75,9 @@ async def test_get_parcel_returns_parcel_on_success():
     assert CODE in session.get.call_args[0][0]
     # the key is sent as a bearer header, never as a query parameter
     assert API_KEY not in session.get.call_args[0][0]
-    assert session.get.call_args.kwargs["headers"]["Authorization"] == f"Bearer {API_KEY}"
+    assert (
+        session.get.call_args.kwargs["headers"]["Authorization"] == f"Bearer {API_KEY}"
+    )
 
 
 async def test_get_parcel_returns_none_when_not_found():
@@ -130,7 +133,9 @@ async def test_get_parcel_raises_on_unknown_error_envelope():
 
 
 async def test_get_parcel_raises_on_error_envelope_without_detail():
-    client = ExampleCarrierApiClient(API_KEY, _session_returning(200, {"status": "error"}))
+    client = ExampleCarrierApiClient(
+        API_KEY, _session_returning(200, {"status": "error"})
+    )
     with pytest.raises(ExampleCarrierApiError):
         await client.async_get_parcel(CODE)
 

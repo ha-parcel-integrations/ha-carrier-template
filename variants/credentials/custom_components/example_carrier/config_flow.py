@@ -1,12 +1,12 @@
 """Config flow for the Example Carrier parcel tracker integration."""
+
 from __future__ import annotations
 
-import logging
 from collections.abc import Mapping
+import logging
 from typing import Any
 
 import aiohttp
-import voluptuous as vol
 from homeassistant.config_entries import (
     ConfigEntry,
     ConfigFlow,
@@ -18,6 +18,7 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import section
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+import voluptuous as vol
 
 from .api import (
     ExampleCarrierApiClient,
@@ -145,9 +146,7 @@ class ExampleCarrierOptionsFlowHandler(OptionsFlow):
             # Reload so a changed history/delivered-retention setting takes
             # effect immediately. No update listener is registered —
             # combining the two is deprecated.
-            self.hass.config_entries.async_schedule_reload(
-                self.config_entry.entry_id
-            )
+            self.hass.config_entries.async_schedule_reload(self.config_entry.entry_id)
             return self.async_create_entry(
                 title="",
                 data={

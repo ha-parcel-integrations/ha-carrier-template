@@ -1,10 +1,11 @@
 """Tests for the Example Carrier config and options flow."""
+
 from unittest.mock import AsyncMock, patch
 
 import aiohttp
-import pytest
 from homeassistant.config_entries import SOURCE_USER
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
+import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.example_carrier.api import (
@@ -22,7 +23,9 @@ EMAIL = "user@example.test"
 PASSWORD = "hunter2"
 CREDENTIALS = {CONF_EMAIL: EMAIL, CONF_PASSWORD: PASSWORD}
 
-LOGIN = "custom_components.example_carrier.config_flow.ExampleCarrierApiClient.async_login"
+LOGIN = (
+    "custom_components.example_carrier.config_flow.ExampleCarrierApiClient.async_login"
+)
 
 
 def _entry(email: str = EMAIL) -> MockConfigEntry:
@@ -61,7 +64,7 @@ async def test_user_flow_creates_entry(hass):
 
 
 @pytest.mark.parametrize(
-    "error,expected",
+    ("error", "expected"),
     [
         (ExampleCarrierAuthError("HTTP 401"), "invalid_auth"),
         (ExampleCarrierApiError("HTTP 500"), "cannot_connect"),
@@ -176,9 +179,7 @@ async def test_options_flow_saves_and_reloads(hass):
     result = await hass.config_entries.options.async_init(entry.entry_id)
     assert result["step_id"] == "init"
 
-    with patch.object(
-        hass.config_entries, "async_schedule_reload"
-    ) as schedule_reload:
+    with patch.object(hass.config_entries, "async_schedule_reload") as schedule_reload:
         result = await hass.config_entries.options.async_configure(
             result["flow_id"],
             {

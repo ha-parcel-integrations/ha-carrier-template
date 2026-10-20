@@ -22,14 +22,17 @@ Three things happen, in this order:
 
 Run it from anywhere; paths are resolved relative to the template root.
 """
+
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
+from pathlib import Path
 import re
 import shutil
+import subprocess
 import sys
-from pathlib import Path
 
 TEMPLATE_ROOT = Path(__file__).resolve().parent.parent
 
@@ -79,7 +82,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         required=True,
         help="Repo name -- the full ha-* form, e.g. ha-cainiao, not 'cainiao'",
     )
-    parser.add_argument("--manufacturer", help="Device manufacturer (defaults to --name)")
+    parser.add_argument(
+        "--manufacturer", help="Device manufacturer (defaults to --name)"
+    )
     parser.add_argument(
         "--auth",
         choices=("none", "credentials", "byo-key"),
@@ -260,9 +265,7 @@ def rewrite_contents(out: Path, args: argparse.Namespace, tags: set[str]) -> Non
         except UnicodeDecodeError:
             continue  # a binary file with a text-ish suffix; leave it alone
 
-        text = prune_variant_blocks(
-            text, tags, where=str(path.relative_to(out))
-        )
+        text = prune_variant_blocks(text, tags, where=str(path.relative_to(out)))
 
         for old, new in replacements:
             text = text.replace(old, new)
@@ -360,7 +363,25 @@ def write_todo(out: Path, args: argparse.Namespace) -> list[str]:
     return pending
 
 
-def generate(args: argparse.Namespace, out: Path) -> dict[str, list[str]]:
+def format_generated(out: Path) -> bool:
+    """Run ruff's fixer and formatter over ``out``; False if ruff is missing.
+
+    Token replacement changes line lengths (a short domain pulls a wrapped
+    import onto one line), so the output only matches ``ruff.toml`` after a
+    pass of its own.
+    """
+    if importlib.util.find_spec("ruff") is not None:
+        ruff = [sys.executable, "-m", "ruff"]
+    elif (binary := shutil.which("ruff")) is not None:
+        ruff = [binary]
+    else:
+        return False
+    subprocess.run([*ruff, "check", "--fix", "--quiet", "."], cwd=out, check=False)
+    subprocess.run([*ruff, "format", "--quiet", "."], cwd=out, check=False)
+    return True
+
+
+def generate(args: argparse.Namespace, out: Path) -> dict[str, list[str] | bool]:
     """Render a full carrier repo into ``out`` (which must not yet exist).
 
     The library entry point behind ``main()`` — split out so other tooling
@@ -384,8 +405,14 @@ def generate(args: argparse.Namespace, out: Path) -> dict[str, list[str]]:
     rename_paths(out, args.domain)
     finalise_manifest(out, args)
     pending = write_todo(out, args)
+    formatted = format_generated(out)
 
-    return {"replaced": replaced, "removed": removed, "pending": pending}
+    return {
+        "replaced": replaced,
+        "removed": removed,
+        "pending": pending,
+        "formatted": formatted,
+    }
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -407,6 +434,8 @@ def main(argv: list[str] | None = None) -> int:
             f"removed {len(result['removed'])}"
         )
     print(f"  {len(result['pending'])} file(s) still carry TODO(carrier) — see TODO.md")
+    if not result["formatted"]:
+        print("  ruff not found — run `ruff check --fix . && ruff format .` yourself")
     print()
     print("Next:")
     print(f"  cd {out}")

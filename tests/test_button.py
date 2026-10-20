@@ -1,4 +1,5 @@
 """Tests for the Example Carrier refresh button."""
+
 from unittest.mock import AsyncMock, MagicMock
 
 from custom_components.example_carrier.button import ExampleCarrierRefreshButton

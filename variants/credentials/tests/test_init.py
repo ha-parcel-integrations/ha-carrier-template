@@ -1,11 +1,12 @@
 """Tests for Example Carrier setup and unload."""
+
 from unittest.mock import AsyncMock, patch
 
 import aiohttp
-import pytest
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 from homeassistant.helpers import entity_registry as er
+import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.example_carrier.api import (
@@ -45,7 +46,9 @@ async def test_setup_and_unload(hass):
 
     assert entry.state is ConfigEntryState.LOADED
 
-    incoming = hass.states.get("sensor.example_carrier_user_example_test_incoming_parcels")
+    incoming = hass.states.get(
+        "sensor.example_carrier_user_example_test_incoming_parcels"
+    )
     assert incoming is not None
     assert incoming.state == "1"
 

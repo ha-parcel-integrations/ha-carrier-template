@@ -36,6 +36,8 @@ jobs:
 
       - name: Lint with Ruff
         uses: astral-sh/ruff-action@v4.1.0
+        with:
+          version: "0.17.0"
 
       - name: Hassfest validation
         uses: home-assistant/actions/hassfest@master
@@ -122,8 +124,8 @@ jobs:
       - name: Lint the generated repo with Ruff
         working-directory: ${{ runner.temp }}/generated
         run: |
-          pip install ruff
           ruff check .
+          ruff format --check .
 
       - name: Make the generated repo the workspace
         run: |

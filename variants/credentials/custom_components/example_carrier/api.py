@@ -15,6 +15,7 @@ setup and the coordinator rely on:
 The session is injected rather than created here, so the caller controls the
 cookie jar (see ``__init__.py`` for why each entry needs its own).
 """
+
 from __future__ import annotations
 
 import logging
@@ -97,7 +98,9 @@ class ExampleCarrierApiClient:
             if response.status == 429:
                 retry_after_header = response.headers.get("Retry-After")
                 try:
-                    retry_after = float(retry_after_header) if retry_after_header else None
+                    retry_after = (
+                        float(retry_after_header) if retry_after_header else None
+                    )
                 except ValueError:
                     retry_after = None  # an HTTP-date, not seconds; let the caller's own backoff handle it
                 raise ExampleCarrierApiError(

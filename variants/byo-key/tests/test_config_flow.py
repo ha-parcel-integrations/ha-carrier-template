@@ -1,9 +1,10 @@
 """Tests for the Example Carrier config and options flow."""
+
 from unittest.mock import AsyncMock, patch
 
 import aiohttp
-import pytest
 from homeassistant.config_entries import SOURCE_USER
+import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.example_carrier.api import (
@@ -81,7 +82,7 @@ async def test_user_flow_creates_hub_with_a_valid_key(hass):
 
 
 @pytest.mark.parametrize(
-    "error,expected",
+    ("error", "expected"),
     [
         (ExampleCarrierAuthError("HTTP 401"), "invalid_auth"),
         (ExampleCarrierApiError("HTTP 500"), "cannot_connect"),
@@ -140,7 +141,9 @@ async def test_reauth_surfaces_invalid_key(hass):
     entry.add_to_hass(hass)
 
     result = await entry.start_reauth_flow(hass)
-    with patch(VALIDATE_KEY, new=AsyncMock(side_effect=ExampleCarrierAuthError("HTTP 401"))):
+    with patch(
+        VALIDATE_KEY, new=AsyncMock(side_effect=ExampleCarrierAuthError("HTTP 401"))
+    ):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], KEY_INPUT
         )
@@ -154,7 +157,9 @@ async def test_reauth_surfaces_connection_errors(hass):
     entry.add_to_hass(hass)
 
     result = await entry.start_reauth_flow(hass)
-    with patch(VALIDATE_KEY, new=AsyncMock(side_effect=ExampleCarrierApiError("HTTP 500"))):
+    with patch(
+        VALIDATE_KEY, new=AsyncMock(side_effect=ExampleCarrierApiError("HTTP 500"))
+    ):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], KEY_INPUT
         )

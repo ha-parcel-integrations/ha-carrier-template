@@ -10,7 +10,6 @@ Run with ``pytest scripts/test_bootstrap.py``.
 import argparse
 import json
 
-import pytest
 from bootstrap import (
     class_prefix,
     copy_tree,
@@ -18,6 +17,7 @@ from bootstrap import (
     generate,
     prune_variant_blocks,
 )
+import pytest
 
 TAGS = {"auth-none"}
 
@@ -27,38 +27,46 @@ def prune(text: str) -> str:
 
 
 def test_active_block_keeps_its_body_without_markers():
-    assert prune(
-        "before\n"
-        "# >>> variant: auth-none\n"
-        "kept\n"
-        "# <<< variant: auth-none\n"
-        "after\n"
-    ) == "before\nkept\nafter\n"
+    assert (
+        prune(
+            "before\n# >>> variant: auth-none\nkept\n# <<< variant: auth-none\nafter\n"
+        )
+        == "before\nkept\nafter\n"
+    )
 
 
 def test_inactive_block_is_removed_entirely():
-    assert prune(
-        "before\n"
-        "# >>> variant: auth-credentials\n"
-        "dropped\n"
-        "# <<< variant: auth-credentials\n"
-        "after\n"
-    ) == "before\nafter\n"
+    assert (
+        prune(
+            "before\n"
+            "# >>> variant: auth-credentials\n"
+            "dropped\n"
+            "# <<< variant: auth-credentials\n"
+            "after\n"
+        )
+        == "before\nafter\n"
+    )
 
 
 def test_markdown_comment_markers_work_too():
-    assert prune(
-        "<!-- >>> variant: auth-credentials -->\ndropped\n"
-        "<!-- <<< variant: auth-credentials -->\nkept\n"
-    ) == "kept\n"
+    assert (
+        prune(
+            "<!-- >>> variant: auth-credentials -->\ndropped\n"
+            "<!-- <<< variant: auth-credentials -->\nkept\n"
+        )
+        == "kept\n"
+    )
 
 
 def test_adjacent_blocks_resolve_independently():
     """The either/or pairs the template leans on."""
-    assert prune(
-        "# >>> variant: auth-none\nA\n# <<< variant: auth-none\n"
-        "# >>> variant: auth-credentials\nB\n# <<< variant: auth-credentials\n"
-    ) == "A\n"
+    assert (
+        prune(
+            "# >>> variant: auth-none\nA\n# <<< variant: auth-none\n"
+            "# >>> variant: auth-credentials\nB\n# <<< variant: auth-credentials\n"
+        )
+        == "A\n"
+    )
 
 
 def test_text_without_markers_is_untouched():
@@ -85,10 +93,7 @@ def test_nested_block_raises():
 
 def test_mismatched_closing_marker_raises():
     with pytest.raises(SystemExit, match="closing marker"):
-        prune(
-            "# >>> variant: auth-credentials\n"
-            "# <<< variant: auth-none\n"
-        )
+        prune("# >>> variant: auth-credentials\n# <<< variant: auth-none\n")
 
 
 def test_stray_closing_marker_raises():
@@ -102,7 +107,7 @@ def test_stray_closing_marker_raises():
 
 
 @pytest.mark.parametrize(
-    "name,expected",
+    ("name", "expected"),
     [
         ("Cainiao", "Cainiao"),
         ("Acme Post", "AcmePost"),
@@ -121,7 +126,7 @@ def test_class_prefix_rejects_a_nameless_name():
 
 
 @pytest.mark.parametrize(
-    "name,text,expected",
+    ("name", "text", "expected"),
     [
         ("Cainiao", "an Cainiao parcel", "a Cainiao parcel"),
         ("Evri", "a Evri parcel", "an Evri parcel"),

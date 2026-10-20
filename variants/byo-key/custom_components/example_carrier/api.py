@@ -23,6 +23,7 @@ the response envelope handling with the real endpoint's behaviour. Keep the
 Never log, cache in diagnostics, or otherwise surface the key itself — only
 whether a call using it succeeded.
 """
+
 from __future__ import annotations
 
 import logging
@@ -120,7 +121,9 @@ class ExampleCarrierApiClient:
             if response.status == 429:
                 retry_after_header = response.headers.get("Retry-After")
                 try:
-                    retry_after = float(retry_after_header) if retry_after_header else None
+                    retry_after = (
+                        float(retry_after_header) if retry_after_header else None
+                    )
                 except ValueError:
                     retry_after = None  # an HTTP-date, not seconds; let the caller's own backoff handle it
                 raise ExampleCarrierApiError(

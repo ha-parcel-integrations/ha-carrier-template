@@ -1,8 +1,9 @@
 """Example Carrier parcel tracker custom component for Home Assistant."""
+
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
+import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -27,7 +28,9 @@ class ExampleCarrierData:
 type ExampleCarrierConfigEntry = ConfigEntry[ExampleCarrierData]
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ExampleCarrierConfigEntry) -> bool:
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ExampleCarrierConfigEntry
+) -> bool:
     """Set up Example Carrier from a config entry.
 
     The key is stateless (no cookie/session to keep separate per entry, unlike
@@ -72,7 +75,9 @@ async def _async_options_updated(
     await entry.runtime_data.coordinator.async_request_refresh()
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: ExampleCarrierConfigEntry) -> bool:
+async def async_unload_entry(
+    hass: HomeAssistant, entry: ExampleCarrierConfigEntry
+) -> bool:
     """Unload the Example Carrier config entry."""
     if not await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
         return False
