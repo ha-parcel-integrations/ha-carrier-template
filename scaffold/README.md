@@ -80,15 +80,21 @@ A custom Home Assistant integration that tracks your [Example Carrier](https://e
 
 ### HACS (recommended)
 
-1. In HACS, choose the three-dot menu → **Custom repositories**.
-2. Add `https://github.com/ha-parcel-integrations/ha-example-carrier` as an **Integration**.
-3. Install **Example Carrier** and restart Home Assistant.
+Click the button below to open this repository in HACS, then install **Example Carrier**:
+
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=ha-parcel-integrations&repository=ha-example-carrier&category=integration)
+
+Or add it by hand: in HACS, choose the three-dot menu → **Custom repositories**, add `https://github.com/ha-parcel-integrations/ha-example-carrier` as an **Integration** and install **Example Carrier**.
+
+Restart Home Assistant if HACS asks you to.
 
 ### Manual
 
 Copy `custom_components/example_carrier` into your `config/custom_components/` folder and restart Home Assistant.
 
 ## Configuration
+
+[![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=example_carrier)
 
 <!-- >>> variant: auth-none -->
 Add the integration via **Settings → Devices & Services → Add Integration → Example Carrier**. There is nothing to fill in: the hub is created immediately (Example Carrier tracking needs no account).
