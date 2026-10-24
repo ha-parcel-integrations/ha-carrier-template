@@ -172,6 +172,7 @@ backoff, delivered-skip) is spelled out below.
 - **Full stop (account-less carriers only):** `update_interval = None` when
   nothing is tracked or every tracked parcel is delivered. Resumes the moment
   a parcel is added back, via the options-flow refresh above.
+- **Failed polls:** `_async_update_data` wraps `_async_poll` and recomputes `update_interval` on any failure (never to `None`, falling back to the mid tier), so a failure after the overnight poll retries at the daytime cadence instead of waiting out the quiet window.
 - **Stagger:** a small, stable per-install offset (hash of the config entry
   id) is added to every computed interval so installs don't all hit an anchor
   or tier boundary at the same second.
