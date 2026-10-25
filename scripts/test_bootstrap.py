@@ -114,6 +114,9 @@ def test_stray_closing_marker_raises():
         ("DHL eCommerce", "DHLeCommerce"),
         ("Post-NL", "PostNL"),
         ("Evri 2", "Evri2"),
+        ("Pošta Slovenije", "PostaSlovenije"),
+        ("Česká pošta", "CeskaPosta"),
+        ("Posti Norge Ø", "PostiNorgeO"),
     ],
 )
 def test_class_prefix_keeps_the_carrier_capitalisation(name, expected):

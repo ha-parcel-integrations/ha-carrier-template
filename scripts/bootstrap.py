@@ -33,6 +33,7 @@ import re
 import shutil
 import subprocess
 import sys
+import unicodedata
 
 TEMPLATE_ROOT = Path(__file__).resolve().parent.parent
 
@@ -120,16 +121,43 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return args
 
 
+# Letters NFKD leaves whole, so they would read as separators.
+_FOLD = str.maketrans(
+    {
+        "ß": "ss",
+        "æ": "ae",
+        "Æ": "AE",
+        "ø": "o",
+        "Ø": "O",
+        "đ": "d",
+        "Đ": "D",
+        "ł": "l",
+        "Ł": "L",
+        "ð": "d",
+        "Ð": "D",
+        "þ": "th",
+        "Þ": "Th",
+    }
+)
+
+
 def class_prefix(name: str) -> str:
     """Turn a display name into a Python class prefix.
 
     "Cainiao" -> "Cainiao"; "DHL eCommerce" -> "DHLeCommerce"; "Post-NL" ->
-    "PostNL". Separators are dropped, and a word is only capitalised when it
-    carries no capital of its own — otherwise "eCommerce" would become
-    "ECommerce" and "NL" would survive as "NL" by luck rather than by rule.
-    Carriers care about how their name is written.
+    "PostNL"; "Pošta Slovenije" -> "PostaSlovenije". Separators are dropped,
+    and a word is only capitalised when it carries no capital of its own —
+    otherwise "eCommerce" would become "ECommerce" and "NL" would survive as
+    "NL" by luck rather than by rule. Carriers care about how their name is
+    written.
+
+    A letter outside ASCII is folded to its base letter first. Without that it
+    would read as a separator, splitting its own word and capitalising the
+    rest of it: "Pošta" became "PoTa".
     """
-    cleaned = re.sub(r"[^0-9A-Za-z]+", " ", name).split()
+    decomposed = unicodedata.normalize("NFKD", name.translate(_FOLD))
+    folded = "".join(c for c in decomposed if not unicodedata.combining(c))
+    cleaned = re.sub(r"[^0-9A-Za-z]+", " ", folded).split()
     if not cleaned:
         raise SystemExit("--name must contain at least one alphanumeric character")
     return "".join(
