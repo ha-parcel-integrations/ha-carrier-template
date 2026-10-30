@@ -458,3 +458,36 @@ async def test_losing_the_eta_is_silent(hass):
     await hass.async_block_till_done()
 
     assert events == []
+
+
+async def test_a_parcel_the_delivered_list_leaves_out_still_fires_delivered(hass):
+    """The retention option limits the delivered sensor, never the events."""
+    entry = _entry_with(
+        [{CONF_TRACKING_CODE: ACTIVE_CODE}, {CONF_TRACKING_CODE: OTHER_CODE}]
+    )
+    entry.add_to_hass(hass)
+    hass.config_entries.async_update_entry(
+        entry, options={**entry.options, CONF_DELIVERED_FILTER_AMOUNT: 1}
+    )
+    client = AsyncMock()
+    coordinator = ExampleCarrierCoordinator(hass, client, entry)
+
+    delivered = []
+    hass.bus.async_listen(f"{DOMAIN}_parcel_delivered", lambda e: delivered.append(e))
+
+    client.async_get_parcel.side_effect = lambda code: active_sample(code)
+    await coordinator._async_update_data()
+
+    older = delivered_sample(ACTIVE_CODE)
+    newer = delivered_sample(OTHER_CODE)
+    newer["deliveredAt"] = "2026-04-30T13:12:42Z"
+    client.async_get_parcel.side_effect = lambda code: (
+        older if code == ACTIVE_CODE else newer
+    )
+    await coordinator._async_update_data()
+    await hass.async_block_till_done()
+
+    assert sorted(event.data["barcode"] for event in delivered) == sorted(
+        [ACTIVE_CODE, OTHER_CODE]
+    )
+    assert [parcel["barcode"] for parcel in coordinator.delivered] == [OTHER_CODE]

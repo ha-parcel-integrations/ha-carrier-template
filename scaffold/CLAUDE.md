@@ -35,6 +35,9 @@ you act in one of these areas:
   summary+diagnostic sensors. Add a new non-parcel sensor's unique_id to the set.
 - **Per-parcel sensors are removed by the summary sensor** via
   `entity_registry.async_remove` (self-removal races and leaves ghosts).
+- **Events and `_known_state` are built from the unfiltered delivered list.**
+  The "keep N days / N parcels" option only trims `coordinator.delivered`; a
+  parcel it leaves out must still fire `_parcel_delivered`.
 - **The optional pickup-point summaries are a pair.** A carrier that can tell
   a parcel is destined for a pickup point exposes
   `en_route_to_pickup_point` for `pickup is true` before it arrives; one that

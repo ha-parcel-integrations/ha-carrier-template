@@ -237,24 +237,24 @@ class ExampleCarrierCoordinator(DataUpdateCoordinator[list[dict]]):
         active = [parcel for parcel in normalized if not parcel["delivered"]]
         delivered = [parcel for parcel in normalized if parcel["delivered"]]
 
-        self.delivered = apply_delivered_filter(
-            sort_parcels_by_ts(delivered, "delivered_at", descending=True),
-            self.config_entry,
+        delivered_sorted = sort_parcels_by_ts(
+            delivered, "delivered_at", descending=True
         )
+        self.delivered = apply_delivered_filter(delivered_sorted, self.config_entry)
         normalized_active = sort_parcels_by_ts(active, "planned_from")
 
-        # Incoming = active + delivered, combined so the transition to
-        # delivered is visible in one set.
-        incoming = normalized_active + self.delivered
-        self._fire_change_events(incoming)
+        # Events and remembered state cover every parcel; the retention option
+        # only limits what the delivered sensor shows.
+        tracked = normalized_active + delivered_sorted
+        self._fire_change_events(tracked)
         self._known_state = {
             parcel["barcode"]: parcel["status"]
-            for parcel in incoming
+            for parcel in tracked
             if parcel.get("barcode")
         }
         self._known_delivery_times = {
             parcel["barcode"]: (parcel.get("planned_from"), parcel.get("planned_to"))
-            for parcel in incoming
+            for parcel in tracked
             if parcel.get("barcode")
         }
 
