@@ -19,7 +19,10 @@ from custom_components.example_carrier.const import (
     DOMAIN,
 )
 
+from .payloads import active_sample
+
 EMAIL = "user@example.test"
+CLIENT = "custom_components.example_carrier.api.ExampleCarrierApiClient"
 PASSWORD = "hunter2"
 CREDENTIALS = {CONF_EMAIL: EMAIL, CONF_PASSWORD: PASSWORD}
 
@@ -172,14 +175,30 @@ async def test_reauth_surfaces_connection_errors(hass):
 # ---------------------------------------------------------------------------
 
 
-async def test_options_flow_saves_and_reloads(hass):
+async def test_options_flow_reloads_with_the_new_options(hass):
     entry = _entry()
     entry.add_to_hass(hass)
 
-    result = await hass.config_entries.options.async_init(entry.entry_id)
-    assert result["step_id"] == "init"
+    seen = []
+    real_schedule = hass.config_entries.async_schedule_reload
 
-    with patch.object(hass.config_entries, "async_schedule_reload") as schedule_reload:
+    def _record(entry_id):
+        seen.append(dict(entry.options))
+        return real_schedule(entry_id)
+
+    with (
+        patch(f"{CLIENT}.async_login", new=AsyncMock(return_value={})),
+        patch(
+            f"{CLIENT}.async_get_parcels",
+            new=AsyncMock(return_value=[active_sample()]),
+        ),
+        patch.object(hass.config_entries, "async_schedule_reload", side_effect=_record),
+    ):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+
+        result = await hass.config_entries.options.async_init(entry.entry_id)
+        assert result["step_id"] == "init"
         result = await hass.config_entries.options.async_configure(
             result["flow_id"],
             {
@@ -190,14 +209,14 @@ async def test_options_flow_saves_and_reloads(hass):
                 "history": {CONF_INCLUDE_HISTORY: True},
             },
         )
+        await hass.async_block_till_done()
 
-    assert result["type"] == "create_entry"
-    assert result["data"] == {
+    expected = {
         CONF_DELIVERED_FILTER_TYPE: "parcels",
         CONF_DELIVERED_FILTER_AMOUNT: 5,
         CONF_INCLUDE_HISTORY: True,
     }
-    # A changed setting only takes effect on reload, so the flow schedules one
-    # itself rather than registering an update listener (which is deprecated in
-    # combination with reloading).
-    schedule_reload.assert_called_once_with(entry.entry_id)
+    assert result["type"] == "create_entry"
+    assert result["data"] == expected
+    # The reload must see the saved options, not the ones from before the form.
+    assert seen == [expected]
