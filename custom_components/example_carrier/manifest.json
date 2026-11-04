@@ -1,6 +1,7 @@
 {
   "domain": "example_carrier",
   "name": "Example Carrier",
+  "categories": ["productivity_information"],
   "codeowners": [
     "@peter-mdf"
   ],
