@@ -147,3 +147,50 @@ async def test_options_update_applies_live_without_reload(hass):
 
     incoming = hass.states.get("sensor.example_carrier_incoming_parcels")
     assert incoming.state == "2"
+
+
+async def test_entry_write_without_an_options_change_does_not_refresh(hass):
+    """A write that changed no option must not poll.
+
+    Home Assistant notifies the update listener on every
+    ``async_update_entry``, and ``async_request_refresh`` ignores the "Enable
+    polling for updates" system option — so a coordinator that persists a
+    token or a learned identifier onto the entry must not turn that write into
+    a poll.
+    """
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=DOMAIN,
+        options={CONF_PARCELS: [{CONF_TRACKING_CODE: ACTIVE_CODE}]},
+    )
+    entry.add_to_hass(hass)
+
+    with patch(
+        "custom_components.example_carrier.api.ExampleCarrierApiClient.async_get_parcel",
+        new=AsyncMock(return_value=_sample()),
+    ):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+
+        refresh = AsyncMock()
+        with patch.object(
+            entry.runtime_data.coordinator, "async_request_refresh", new=refresh
+        ):
+            hass.config_entries.async_update_entry(
+                entry, data={**entry.data, "persisted_by_the_coordinator": "value"}
+            )
+            await hass.async_block_till_done()
+            assert refresh.call_count == 0
+
+            hass.config_entries.async_update_entry(
+                entry,
+                options={
+                    **entry.options,
+                    CONF_PARCELS: [
+                        {CONF_TRACKING_CODE: ACTIVE_CODE},
+                        {CONF_TRACKING_CODE: OTHER_CODE},
+                    ],
+                },
+            )
+            await hass.async_block_till_done()
+            assert refresh.call_count == 1

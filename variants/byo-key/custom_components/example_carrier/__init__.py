@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from collections.abc import Mapping
+from dataclasses import dataclass, field
 import logging
 
 from homeassistant.config_entries import ConfigEntry
@@ -23,6 +24,9 @@ class ExampleCarrierData:
 
     client: ExampleCarrierApiClient
     coordinator: ExampleCarrierCoordinator
+    # The options as last applied, so an entry write that changed no option
+    # is not mistaken for an options edit — see _async_options_updated.
+    options: Mapping[str, object] = field(default_factory=dict)
 
 
 type ExampleCarrierConfigEntry = ConfigEntry[ExampleCarrierData]
@@ -51,7 +55,9 @@ async def async_setup_entry(
     # it with backoff.
     await coordinator.async_config_entry_first_refresh()
 
-    entry.runtime_data = ExampleCarrierData(client=client, coordinator=coordinator)
+    entry.runtime_data = ExampleCarrierData(
+        client=client, coordinator=coordinator, options=dict(entry.options)
+    )
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
@@ -71,8 +77,20 @@ async def async_setup_entry(
 async def _async_options_updated(
     hass: HomeAssistant, entry: ExampleCarrierConfigEntry
 ) -> None:
-    """Apply changed options by refreshing the coordinator."""
-    await entry.runtime_data.coordinator.async_request_refresh()
+    """Apply changed options by refreshing the coordinator.
+
+    Home Assistant notifies an update listener on *every* ``async_update_entry``,
+    not just an options edit, so the options are compared first. A carrier whose
+    coordinator persists something onto the entry (a rotated token, a learned
+    identifier) would otherwise poll on that write's cadence — and
+    ``async_request_refresh`` goes straight past the "Enable polling for
+    updates" system option, which only gates the *scheduled* refresh.
+    """
+    data = entry.runtime_data
+    if entry.options == data.options:
+        return
+    data.options = dict(entry.options)
+    await data.coordinator.async_request_refresh()
 
 
 async def async_unload_entry(

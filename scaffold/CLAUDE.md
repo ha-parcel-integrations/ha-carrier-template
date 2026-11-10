@@ -81,6 +81,17 @@ decisions. Changes apply without a restart. Two models, **do not mix them**:
   new options are saved, so anything read from `entry.options` at setup keeps
   the old value.
 
+**`_async_options_updated` compares `entry.options` against the snapshot on
+`runtime_data` before refreshing — don't drop that.** HA notifies an update
+listener on *every* `async_update_entry`, not just an options edit, so the
+moment this carrier's coordinator persists anything onto the entry (a rotated
+token, a learned identifier) an unconditional refresh turns that write into a
+poll — on the write's cadence, and straight past the "Enable polling for
+updates" system option, which only gates the coordinator's *scheduled*
+refresh. That is a reported bug elsewhere in the suite, not a theoretical
+one: a ten-minute token renewal kept polling an entry whose owner had
+switched polling off.
+
 ## Auth models
 
 Three `--auth` builds, one axis: **what the config flow asks for and
