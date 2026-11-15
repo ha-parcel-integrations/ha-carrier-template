@@ -103,6 +103,31 @@ async def test_update_keeps_cached_payload_on_error(hass):
     assert len(coordinator.delivered) == 1
 
 
+async def test_a_persisting_failure_warns_once_and_logs_recovery(hass, caplog):
+    entry = _entry_with(
+        [{CONF_TRACKING_CODE: DELIVERED_CODE}, {CONF_TRACKING_CODE: ACTIVE_CODE}]
+    )
+    entry.add_to_hass(hass)
+    client = AsyncMock()
+    failing = ExampleCarrierApiError("HTTP 500")
+
+    async def _get(code):
+        if code == ACTIVE_CODE and failing is not None:
+            raise failing
+        return _in_transit(code) if code == ACTIVE_CODE else delivered_sample()
+
+    client.async_get_parcel.side_effect = _get
+    coordinator = ExampleCarrierCoordinator(hass, client, entry)
+    await coordinator._async_update_data()
+    await coordinator._async_update_data()
+    assert caplog.text.count("fetch failed") == 1
+
+    failing = None
+    await coordinator._async_update_data()
+    await coordinator._async_update_data()
+    assert caplog.text.count("recovered") == 1
+
+
 async def test_update_raises_when_every_parcel_fails(hass):
     entry = _entry_with([{CONF_TRACKING_CODE: DELIVERED_CODE}])
     entry.add_to_hass(hass)

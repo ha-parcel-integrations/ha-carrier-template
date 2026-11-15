@@ -162,6 +162,9 @@ class ExampleCarrierCoordinator(DataUpdateCoordinator[list[dict]]):
         # not the barcode (a never-scanned parcel has no barcode). Lives for
         # the integration's lifetime (resets on restart).
         self._delivered_codes: set[str] = set()
+        # Codes whose last fetch failed, so a failure that persists poll after
+        # poll is logged once (and its recovery once) instead of every cycle.
+        self._failing_codes: set[str] = set()
         # Consecutive 429 responses across all tracked parcels, for the
         # exponential backoff in Section 3. Reset to 0 on any success.
         self._consecutive_429 = 0
@@ -249,6 +252,7 @@ class ExampleCarrierCoordinator(DataUpdateCoordinator[list[dict]]):
             code: raw for code, raw in self._raw_cache.items() if code in tracked_codes
         }
         self._delivered_codes &= tracked_codes
+        self._failing_codes &= tracked_codes
 
         # A delivered parcel's payload can never change again, so it is
         # dropped from the fetch — not from ``codes``/the options list, which
@@ -278,11 +282,23 @@ class ExampleCarrierCoordinator(DataUpdateCoordinator[list[dict]]):
                     saw_429 = True
                     if result.retry_after is not None:
                         retry_afters.append(result.retry_after)
-                _LOGGER.warning("Example Carrier fetch failed for %s: %s", code, result)
+                if code in self._failing_codes:
+                    _LOGGER.debug(
+                        "Example Carrier fetch still failing for %s: %s", code, result
+                    )
+                else:
+                    self._failing_codes.add(code)
+                    _LOGGER.warning(
+                        "Example Carrier fetch failed for %s: %s", code, result
+                    )
                 cached = self._raw_cache.get(code)
                 if cached is not None:
                     raws_by_code[code] = cached
                 continue
+
+            if code in self._failing_codes:
+                self._failing_codes.discard(code)
+                _LOGGER.info("Example Carrier fetch for %s recovered", code)
 
             if result is None:
                 # Unknown code, or not scanned yet. Keep prior data if we have
