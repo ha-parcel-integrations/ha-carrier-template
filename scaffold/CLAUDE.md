@@ -157,6 +157,17 @@ buckets on the sensor suffix and the event prefix. Also set
 `directions: incoming+outgoing` for the carrier in the docs site's
 `data/carriers.yml`.
 
+## Calendar: whole days are all-day events
+
+`calendar.py` turns a `00:00:00`–`23:59:59` window (one day or several) into an
+all-day event on dates, the end date being the day after the last day, as
+Home Assistant expects. It checks the window's own offset first (a carrier's
+local or naive wall clock), then Home Assistant's zone (a window sent in UTC).
+Any other window, including a moment stretched to `23:59:59`, stays timed, and
+a moment without an end still gets one hour. Once an event can be on dates,
+compare it through `start_datetime_local` / `end_datetime_local`, never
+`start` / `end`: a date does not compare with a datetime.
+
 ## Tracking-code validation
 
 In code-based carriers (account-based sources have no code entry),
