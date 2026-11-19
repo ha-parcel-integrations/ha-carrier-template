@@ -1,6 +1,6 @@
 """Tests for Example Carrier sensor property logic."""
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock
 
 from custom_components.example_carrier.const import ParcelStatus
@@ -67,16 +67,39 @@ def test_parcel_sensor_missing_barcode():
     assert sensor.extra_state_attributes == {}
 
 
+def _in(**delta) -> str:
+    return (datetime.now(UTC) + timedelta(**delta)).isoformat()
+
+
 def test_next_delivery_picks_earliest():
+    soon = datetime.now(UTC).replace(microsecond=0) + timedelta(days=1)
     coordinator = _coordinator(
         [
-            _parcel("A", planned_from="2026-05-02T10:00:00Z"),
-            _parcel("B", planned_from="2026-05-01T10:00:00Z"),
+            _parcel("A", planned_from=(soon + timedelta(days=1)).isoformat()),
+            _parcel("B", planned_from=soon.isoformat()),
         ]
     )
     sensor = ExampleCarrierNextDeliverySensor(coordinator, _entry())
-    assert sensor.native_value == datetime(2026, 5, 1, 10, 0, tzinfo=UTC)
+    assert sensor.native_value == soon
     assert sensor.extra_state_attributes["barcode"] == "B"
+
+
+def test_next_delivery_skips_a_window_that_has_ended():
+    stale = _parcel("A", planned_from=_in(days=-3))
+    stale["planned_to"] = _in(days=-2)
+    moment_only = _parcel("B", planned_from=_in(hours=-2))
+    coordinator = _coordinator(
+        [stale, moment_only, _parcel("C", planned_from=_in(days=2))]
+    )
+    sensor = ExampleCarrierNextDeliverySensor(coordinator, _entry())
+    assert sensor.extra_state_attributes["barcode"] == "C"
+
+
+def test_next_delivery_keeps_a_window_that_is_still_running():
+    running = _parcel("A", planned_from=_in(hours=-1))
+    running["planned_to"] = _in(hours=2)
+    sensor = ExampleCarrierNextDeliverySensor(_coordinator([running]), _entry())
+    assert sensor.extra_state_attributes["barcode"] == "A"
 
 
 def test_next_delivery_none_without_moments():
@@ -89,7 +112,7 @@ def test_next_delivery_skips_unparseable_moment():
     coordinator = _coordinator(
         [
             _parcel("A", planned_from="not-a-date"),
-            _parcel("B", planned_from="2026-05-01T10:00:00Z"),
+            _parcel("B", planned_from=_in(days=1)),
         ]
     )
     sensor = ExampleCarrierNextDeliverySensor(coordinator, _entry())
@@ -114,6 +137,17 @@ def test_en_route_and_awaiting_pickup_split():
     ]
     assert en_route.native_value == 1
     assert awaiting.native_value == 1
+
+
+def test_en_route_leaves_out_a_returning_pickup_parcel():
+    parcels = [
+        _parcel("BACK", status=ParcelStatus.RETURNING, pickup=True),
+        _parcel("GOING", status=ParcelStatus.IN_TRANSIT, pickup=True),
+    ]
+    en_route = ExampleCarrierEnRouteToPickupPointSensor(_coordinator(parcels), _entry())
+    assert [p["barcode"] for p in en_route.extra_state_attributes["parcels"]] == [
+        "GOING"
+    ]
 
 
 def test_pickup_sensors_zero_without_data():

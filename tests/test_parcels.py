@@ -5,7 +5,8 @@ These need no Home Assistant instance — the whole point of keeping
 rewrite per carrier) can be tested as plain functions.
 """
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -23,10 +24,13 @@ from custom_components.example_carrier.parcels import (
     apply_delivered_filter,
     build_history,
     format_dimensions,
+    is_pickup,
     map_event_status,
     map_parcel_status,
     normalize_parcel,
     parse_iso,
+    planned_for_status,
+    planned_window,
     sort_parcels_by_ts,
     to_iso_timestamp,
 )
@@ -254,12 +258,39 @@ def test_normalize_active_parcel_has_window():
     assert parcel["planned_to"] == "2026-04-29T15:00:00Z"
 
 
-def test_normalize_collapses_point_estimate_to_no_window_end():
+def test_normalize_stretches_a_point_estimate_to_the_end_of_the_day():
     raw = active_sample()
     raw["estimatedDelivery"]["to"] = raw["estimatedDelivery"]["from"]
     parcel = normalize_parcel(raw)
     assert parcel["planned_from"] == "2026-04-29T13:00:00Z"
-    assert parcel["planned_to"] is None
+    assert parcel["planned_to"] == "2026-04-29T23:59:59+00:00"
+
+
+def test_normalize_empties_the_window_at_the_pickup_point_and_when_returning():
+    for code in ("AT_PICKUP_POINT", "RETURN_TO_SENDER"):
+        raw = active_sample()
+        raw["statusCode"] = code
+        parcel = normalize_parcel(raw)
+        assert parcel["planned_from"] is None
+        assert parcel["planned_to"] is None
+
+
+def test_normalize_keeps_pickup_after_collection():
+    raw = pickup_sample()
+    raw["statusCode"] = "DELIVERED"
+    parcel = normalize_parcel(raw)
+    assert parcel["delivered"] is True
+    assert parcel["pickup"] is True
+    assert parcel["pickup_point"] == "Example Point Central Station"
+
+
+def test_normalize_pickup_from_an_earlier_event():
+    raw = active_sample()
+    raw["statusCode"] = "DELIVERED"
+    raw["events"] = [event("AT_PICKUP_POINT", "2026-04-29T09:00:00Z", "Ready")]
+    parcel = normalize_parcel(raw)
+    assert parcel["pickup"] is True
+    assert parcel["pickup_point"] is None
 
 
 def test_normalize_pickup_parcel():
@@ -366,3 +397,115 @@ def test_delivered_filter_keeps_unparseable_timestamp():
     """Better to show a parcel with a broken date than to silently drop it."""
     parcels = [{"barcode": "WEIRD", "delivered_at": "nonsense"}]
     assert apply_delivered_filter(parcels, _entry("days", 7)) == parcels
+
+
+_AMS = ZoneInfo("Europe/Amsterdam")
+
+
+@pytest.mark.parametrize(
+    ("start", "end", "expected"),
+    [
+        (
+            "2026-04-29T13:00:00+02:00",
+            "2026-04-29T15:00:00+02:00",
+            ("2026-04-29T13:00:00+02:00", "2026-04-29T15:00:00+02:00"),
+        ),
+        (
+            "2026-04-29T13:00:00+02:00",
+            None,
+            ("2026-04-29T13:00:00+02:00", "2026-04-29T23:59:59+02:00"),
+        ),
+        (
+            "2026-04-29T13:00:00+02:00",
+            "2026-04-29T13:00:00+02:00",
+            ("2026-04-29T13:00:00+02:00", "2026-04-29T23:59:59+02:00"),
+        ),
+        (
+            "2026-04-29T13:00:00",
+            None,
+            ("2026-04-29T13:00:00+02:00", "2026-04-29T23:59:59+02:00"),
+        ),
+        (
+            "2026-04-29",
+            None,
+            ("2026-04-29T00:00:00+02:00", "2026-04-29T23:59:59+02:00"),
+        ),
+        (
+            date(2026, 4, 29),
+            date(2026, 4, 29),
+            ("2026-04-29T00:00:00+02:00", "2026-04-29T23:59:59+02:00"),
+        ),
+        (
+            "2026-04-29",
+            "2026-05-01",
+            ("2026-04-29T00:00:00+02:00", "2026-05-01T23:59:59+02:00"),
+        ),
+        (
+            "2026-04-29T15:00:00+02:00",
+            "2026-04-29T13:00:00+02:00",
+            ("2026-04-29T13:00:00+02:00", "2026-04-29T15:00:00+02:00"),
+        ),
+        (
+            None,
+            "2026-04-29T13:00:00+02:00",
+            ("2026-04-29T13:00:00+02:00", "2026-04-29T23:59:59+02:00"),
+        ),
+        (
+            datetime(2026, 4, 29, 13, 0),
+            datetime(2026, 4, 29, 15, 0),
+            ("2026-04-29T13:00:00+02:00", "2026-04-29T15:00:00+02:00"),
+        ),
+        (
+            "2026-04-29T23:30:00Z",
+            None,
+            ("2026-04-29T23:30:00Z", "2026-04-30T23:59:59+02:00"),
+        ),
+        (
+            "2026-04-29T13:00:00+02:00",
+            "2026-04-29",
+            ("2026-04-29T13:00:00+02:00", "2026-04-29T23:59:59+02:00"),
+        ),
+        (
+            "2026-04-29",
+            "2026-04-28T10:00:00+02:00",
+            ("2026-04-28T10:00:00+02:00", "2026-04-29T23:59:59+02:00"),
+        ),
+        (
+            "2026-04-29T23:59:59+02:00",
+            None,
+            ("2026-04-29T23:59:59+02:00", None),
+        ),
+        (None, None, (None, None)),
+        ("garbage", None, (None, None)),
+        (12, 13, (None, None)),
+    ],
+)
+def test_planned_window_shapes(start, end, expected):
+    assert planned_window(start, end, zone=_AMS) == expected
+
+
+@pytest.mark.parametrize(
+    "status",
+    [ParcelStatus.AT_PICKUP_POINT, ParcelStatus.RETURNING, ParcelStatus.DELIVERED],
+)
+def test_planned_for_status_empties_the_window(status):
+    assert planned_for_status(status, "a", "b") == (None, None)
+
+
+def test_planned_for_status_keeps_the_window_otherwise():
+    for status in (
+        ParcelStatus.REGISTERED,
+        ParcelStatus.IN_TRANSIT,
+        ParcelStatus.OUT_FOR_DELIVERY,
+        ParcelStatus.PROBLEM,
+        ParcelStatus.UNKNOWN,
+    ):
+        assert planned_for_status(status, "a", "b") == ("a", "b")
+
+
+def test_is_pickup_sources():
+    assert is_pickup(True, ParcelStatus.IN_TRANSIT) is True
+    assert is_pickup(None, ParcelStatus.AT_PICKUP_POINT) is True
+    assert is_pickup(None, ParcelStatus.DELIVERED, [None, ParcelStatus.AT_PICKUP_POINT])
+    assert is_pickup(False, ParcelStatus.IN_TRANSIT, [ParcelStatus.IN_TRANSIT]) is False
+    assert is_pickup(None, ParcelStatus.DELIVERED) is False

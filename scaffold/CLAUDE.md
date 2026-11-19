@@ -157,6 +157,26 @@ buckets on the sensor suffix and the event prefix. Also set
 `directions: incoming+outgoing` for the carrier in the docs site's
 `data/carriers.yml`.
 
+## Parcel contract: window, pickup and the sensors
+
+The rules for when each parcel field is filled or emptied are in the suite's
+`PARCEL_CONTRACT.md`. `parcels.py` carries three helpers that keep a
+normaliser to them, and `tests/test_contract.py` runs the contract's checks
+over every normalised sample; add a sample there when a new shape appears.
+
+- `planned_window(start, end, *, zone)` builds `planned_from` / `planned_to`:
+  a window keeps both ends, one moment with a time ends at `23:59:59` the same
+  day, a date is `00:00:00`–`23:59:59`, two dates span first to last day.
+  `zone` is the carrier's own zone for naive times and bare dates.
+- `planned_for_status(status, planned_from, planned_to)` empties the window at
+  `at_pickup_point`, `returning` and `delivered`.
+- `is_pickup(route_flag, status, event_statuses)` stays `True` once a parcel
+  has reached a pickup point, so a collected parcel keeps `pickup`.
+
+`delivered` is `status is DELIVERED`, plus `RETURNING` only when the carrier
+reports the parcel back at the sender. `next_delivery` skips a parcel whose
+window has ended, and `en_route_to_pickup_point` leaves out `returning`.
+
 ## Calendar: whole days are all-day events
 
 `calendar.py` turns a `00:00:00`–`23:59:59` window (one day or several) into an
