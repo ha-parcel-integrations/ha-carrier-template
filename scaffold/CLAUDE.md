@@ -175,7 +175,11 @@ over every normalised sample; add a sample there when a new shape appears.
   has reached a pickup point, so a collected parcel keeps `pickup`.
 
 `delivered` is `status is DELIVERED`, plus `RETURNING` only when the carrier
-reports the parcel back at the sender. `next_delivery` skips a parcel whose
+reports the parcel back at the sender. An explicit delivered signal from the
+carrier (flag, timestamp or status) maps to `DELIVERED` even over
+`AT_PICKUP_POINT`, because a collected parcel is delivered (a signal that
+already fires on drop-off at the point does not count); on a `RETURNING`
+parcel it counts only as evidence of delivery at the sender. `next_delivery` skips a parcel whose
 window has ended, and `en_route_to_pickup_point` leaves out `returning`.
 
 ## Calendar: whole days are all-day events
