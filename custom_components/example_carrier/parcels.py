@@ -332,6 +332,9 @@ def normalize_parcel(raw: dict, *, include_history: bool = False) -> dict:
     * ``weight`` is kilograms, ``dimensions`` centimetres (see
       :func:`format_dimensions`).
     * ``history`` is ``None`` when the option is off — the key still exists.
+    * ``contents`` stays ``None`` unless the payload carries a real item text
+      (run it through :func:`.contents.clean_contents` / ``join_contents``); the
+      coordinator overlays the user's own value on top.
     """
     tracking_code = raw.get("trackingNumber")
     status_code = raw.get("statusCode")
@@ -360,6 +363,7 @@ def normalize_parcel(raw: dict, *, include_history: bool = False) -> dict:
         "barcode": tracking_code,
         "sender": raw.get("sender") or None,
         "receiver": raw.get("recipient") or None,
+        "contents": None,
         "status": status,
         "raw_status": raw.get("statusText") or status_code,
         "delivered": delivered,

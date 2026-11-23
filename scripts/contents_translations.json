@@ -1,0 +1,614 @@
+{
+  "en": {
+    "track_parcel_contents": {
+      "name": "Contents",
+      "description": "What is in the parcel, in your own words. Calling this again for a tracked parcel replaces it; an empty text clears it."
+    },
+    "update_contents": {
+      "name": "Update parcel contents",
+      "description": "Set what is in a parcel, in your own words, for a tracking code. An empty text clears it."
+    },
+    "update_contents_contents": {
+      "name": "Contents",
+      "description": "What is in the parcel, in your own words. An empty text clears it."
+    },
+    "code_field": {
+      "name": "Tracking code",
+      "description": "The tracking code of the parcel."
+    }
+  },
+  "nl": {
+    "track_parcel_contents": {
+      "name": "Inhoud",
+      "description": "Wat er in het pakket zit, in je eigen woorden. Opnieuw aanroepen voor een gevolgd pakket vervangt de inhoud; een lege tekst wist deze."
+    },
+    "update_contents": {
+      "name": "Pakketinhoud bijwerken",
+      "description": "Stel in wat er in een pakket zit, in je eigen woorden, voor een trackingcode. Een lege tekst wist de inhoud."
+    },
+    "update_contents_contents": {
+      "name": "Inhoud",
+      "description": "Wat er in het pakket zit, in je eigen woorden. Een lege tekst wist de inhoud."
+    },
+    "code_field": {
+      "name": "Trackingcode",
+      "description": "De trackingcode van het pakket."
+    }
+  },
+  "fr": {
+    "track_parcel_contents": {
+      "name": "Contenu",
+      "description": "Ce que contient le colis, avec vos propres mots. Un nouvel appel pour un colis suivi remplace le contenu ; un texte vide l'efface."
+    },
+    "update_contents": {
+      "name": "Mettre à jour le contenu du colis",
+      "description": "Définissez ce que contient un colis, avec vos propres mots, pour un numéro de suivi. Un texte vide efface le contenu."
+    },
+    "update_contents_contents": {
+      "name": "Contenu",
+      "description": "Ce que contient le colis, avec vos propres mots. Un texte vide l'efface."
+    },
+    "code_field": {
+      "name": "Numéro de suivi",
+      "description": "Le numéro de suivi du colis."
+    }
+  },
+  "es": {
+    "track_parcel_contents": {
+      "name": "Contenido",
+      "description": "Lo que hay en el paquete, con tus propias palabras. Si vuelves a llamar a esta acción para un paquete en seguimiento, lo sustituye; un texto vacío lo borra."
+    },
+    "update_contents": {
+      "name": "Actualizar el contenido del paquete",
+      "description": "Indica lo que hay en un paquete, con tus propias palabras, para un código de seguimiento. Un texto vacío borra el contenido."
+    },
+    "update_contents_contents": {
+      "name": "Contenido",
+      "description": "Lo que hay en el paquete, con tus propias palabras. Un texto vacío lo borra."
+    },
+    "code_field": {
+      "name": "Código de seguimiento",
+      "description": "El código de seguimiento del paquete."
+    }
+  },
+  "it": {
+    "track_parcel_contents": {
+      "name": "Contenuto",
+      "description": "Che cosa c'è nel pacco, con parole tue. Richiamando di nuovo l'azione per un pacco monitorato, il contenuto viene sostituito; un testo vuoto lo cancella."
+    },
+    "update_contents": {
+      "name": "Aggiorna il contenuto del pacco",
+      "description": "Imposta che cosa c'è in un pacco, con parole tue, per un codice di tracciamento. Un testo vuoto cancella il contenuto."
+    },
+    "update_contents_contents": {
+      "name": "Contenuto",
+      "description": "Che cosa c'è nel pacco, con parole tue. Un testo vuoto lo cancella."
+    },
+    "code_field": {
+      "name": "Codice di tracciamento",
+      "description": "Il codice di tracciamento del pacco."
+    }
+  },
+  "de": {
+    "track_parcel_contents": {
+      "name": "Inhalt",
+      "description": "Was im Paket ist, in deinen eigenen Worten. Ein erneuter Aufruf für ein verfolgtes Paket ersetzt den Inhalt; ein leerer Text löscht ihn."
+    },
+    "update_contents": {
+      "name": "Paketinhalt aktualisieren",
+      "description": "Lege für eine Sendungsnummer fest, was im Paket ist, in deinen eigenen Worten. Ein leerer Text löscht den Inhalt."
+    },
+    "update_contents_contents": {
+      "name": "Inhalt",
+      "description": "Was im Paket ist, in deinen eigenen Worten. Ein leerer Text löscht ihn."
+    },
+    "code_field": {
+      "name": "Sendungsnummer",
+      "description": "Die Sendungsnummer des Pakets."
+    }
+  },
+  "pt": {
+    "track_parcel_contents": {
+      "name": "Conteúdo",
+      "description": "O que está na encomenda, nas suas próprias palavras. Chamar novamente para uma encomenda acompanhada substitui o conteúdo; um texto vazio apaga-o."
+    },
+    "update_contents": {
+      "name": "Atualizar o conteúdo da encomenda",
+      "description": "Defina o que está numa encomenda, nas suas próprias palavras, para um código de seguimento. Um texto vazio apaga o conteúdo."
+    },
+    "update_contents_contents": {
+      "name": "Conteúdo",
+      "description": "O que está na encomenda, nas suas próprias palavras. Um texto vazio apaga-o."
+    },
+    "code_field": {
+      "name": "Código de seguimento",
+      "description": "O código de seguimento da encomenda."
+    }
+  },
+  "pt-BR": {
+    "track_parcel_contents": {
+      "name": "Conteúdo",
+      "description": "O que há no pacote, com suas próprias palavras. Chamar novamente para um pacote acompanhado substitui o conteúdo; um texto vazio o apaga."
+    },
+    "update_contents": {
+      "name": "Atualizar o conteúdo do pacote",
+      "description": "Defina o que há em um pacote, com suas próprias palavras, para um código de rastreamento. Um texto vazio apaga o conteúdo."
+    },
+    "update_contents_contents": {
+      "name": "Conteúdo",
+      "description": "O que há no pacote, com suas próprias palavras. Um texto vazio o apaga."
+    },
+    "code_field": {
+      "name": "Código de rastreamento",
+      "description": "O código de rastreamento do pacote."
+    }
+  },
+  "pl": {
+    "track_parcel_contents": {
+      "name": "Zawartość",
+      "description": "Co jest w paczce, własnymi słowami. Ponowne wywołanie dla śledzonej paczki zastępuje zawartość; pusty tekst ją usuwa."
+    },
+    "update_contents": {
+      "name": "Zaktualizuj zawartość paczki",
+      "description": "Ustaw własnymi słowami, co jest w paczce o danym numerze śledzenia. Pusty tekst usuwa zawartość."
+    },
+    "update_contents_contents": {
+      "name": "Zawartość",
+      "description": "Co jest w paczce, własnymi słowami. Pusty tekst ją usuwa."
+    },
+    "code_field": {
+      "name": "Numer śledzenia",
+      "description": "Numer śledzenia paczki."
+    }
+  },
+  "sv": {
+    "track_parcel_contents": {
+      "name": "Innehåll",
+      "description": "Vad som finns i paketet, med dina egna ord. Om du anropar den igen för ett spårat paket ersätts innehållet; en tom text rensar det."
+    },
+    "update_contents": {
+      "name": "Uppdatera paketets innehåll",
+      "description": "Ange vad som finns i ett paket, med dina egna ord, för ett spårningsnummer. En tom text rensar innehållet."
+    },
+    "update_contents_contents": {
+      "name": "Innehåll",
+      "description": "Vad som finns i paketet, med dina egna ord. En tom text rensar det."
+    },
+    "code_field": {
+      "name": "Spårningsnummer",
+      "description": "Paketets spårningsnummer."
+    }
+  },
+  "sk": {
+    "track_parcel_contents": {
+      "name": "Obsah",
+      "description": "Čo je v balíku, vlastnými slovami. Opätovné volanie pre sledovaný balík obsah nahradí; prázdny text ho vymaže."
+    },
+    "update_contents": {
+      "name": "Aktualizovať obsah balíka",
+      "description": "Nastavte vlastnými slovami, čo je v balíku s daným sledovacím číslom. Prázdny text obsah vymaže."
+    },
+    "update_contents_contents": {
+      "name": "Obsah",
+      "description": "Čo je v balíku, vlastnými slovami. Prázdny text ho vymaže."
+    },
+    "code_field": {
+      "name": "Sledovacie číslo",
+      "description": "Sledovacie číslo balíka."
+    }
+  },
+  "hu": {
+    "track_parcel_contents": {
+      "name": "Tartalom",
+      "description": "Mi van a csomagban, saját szavaiddal. Egy követett csomagnál az újbóli meghívás lecseréli a tartalmat; az üres szöveg törli."
+    },
+    "update_contents": {
+      "name": "Csomag tartalmának frissítése",
+      "description": "Add meg saját szavaiddal, mi van a csomagban egy nyomkövetési kódhoz. Az üres szöveg törli a tartalmat."
+    },
+    "update_contents_contents": {
+      "name": "Tartalom",
+      "description": "Mi van a csomagban, saját szavaiddal. Az üres szöveg törli."
+    },
+    "code_field": {
+      "name": "Nyomkövetési kód",
+      "description": "A csomag nyomkövetési kódja."
+    }
+  },
+  "fi": {
+    "track_parcel_contents": {
+      "name": "Sisältö",
+      "description": "Mitä paketissa on, omin sanoin. Kutsuminen uudelleen seurattavalle paketille korvaa sisällön; tyhjä teksti tyhjentää sen."
+    },
+    "update_contents": {
+      "name": "Päivitä paketin sisältö",
+      "description": "Aseta seurantakoodille omin sanoin, mitä paketissa on. Tyhjä teksti tyhjentää sisällön."
+    },
+    "update_contents_contents": {
+      "name": "Sisältö",
+      "description": "Mitä paketissa on, omin sanoin. Tyhjä teksti tyhjentää sen."
+    },
+    "code_field": {
+      "name": "Seurantakoodi",
+      "description": "Paketin seurantakoodi."
+    }
+  },
+  "da": {
+    "track_parcel_contents": {
+      "name": "Indhold",
+      "description": "Hvad der er i pakken, med dine egne ord. Hvis du kalder den igen for en fulgt pakke, erstattes indholdet; en tom tekst rydder det."
+    },
+    "update_contents": {
+      "name": "Opdater pakkens indhold",
+      "description": "Angiv med dine egne ord, hvad der er i en pakke, for et sporingsnummer. En tom tekst rydder indholdet."
+    },
+    "update_contents_contents": {
+      "name": "Indhold",
+      "description": "Hvad der er i pakken, med dine egne ord. En tom tekst rydder det."
+    },
+    "code_field": {
+      "name": "Sporingsnummer",
+      "description": "Pakkens sporingsnummer."
+    }
+  },
+  "cs": {
+    "track_parcel_contents": {
+      "name": "Obsah",
+      "description": "Co je v balíku, vlastními slovy. Opětovné volání pro sledovaný balík obsah nahradí; prázdný text jej smaže."
+    },
+    "update_contents": {
+      "name": "Aktualizovat obsah balíku",
+      "description": "Nastavte vlastními slovy, co je v balíku s daným sledovacím číslem. Prázdný text obsah smaže."
+    },
+    "update_contents_contents": {
+      "name": "Obsah",
+      "description": "Co je v balíku, vlastními slovy. Prázdný text jej smaže."
+    },
+    "code_field": {
+      "name": "Sledovací číslo",
+      "description": "Sledovací číslo balíku."
+    }
+  },
+  "sl": {
+    "track_parcel_contents": {
+      "name": "Vsebina",
+      "description": "Kaj je v paketu, z lastnimi besedami. Ponoven klic za spremljan paket vsebino zamenja; prazno besedilo jo izbriše."
+    },
+    "update_contents": {
+      "name": "Posodobi vsebino paketa",
+      "description": "Z lastnimi besedami nastavite, kaj je v paketu s to sledilno kodo. Prazno besedilo vsebino izbriše."
+    },
+    "update_contents_contents": {
+      "name": "Vsebina",
+      "description": "Kaj je v paketu, z lastnimi besedami. Prazno besedilo jo izbriše."
+    },
+    "code_field": {
+      "name": "Sledilna koda",
+      "description": "Sledilna koda paketa."
+    }
+  },
+  "ro": {
+    "track_parcel_contents": {
+      "name": "Conținut",
+      "description": "Ce se află în colet, cu cuvintele tale. Apelarea din nou pentru un colet urmărit înlocuiește conținutul; un text gol îl șterge."
+    },
+    "update_contents": {
+      "name": "Actualizează conținutul coletului",
+      "description": "Setează, cu cuvintele tale, ce se află într-un colet, pentru un cod de urmărire. Un text gol șterge conținutul."
+    },
+    "update_contents_contents": {
+      "name": "Conținut",
+      "description": "Ce se află în colet, cu cuvintele tale. Un text gol îl șterge."
+    },
+    "code_field": {
+      "name": "Cod de urmărire",
+      "description": "Codul de urmărire al coletului."
+    }
+  },
+  "nb": {
+    "track_parcel_contents": {
+      "name": "Innhold",
+      "description": "Hva som er i pakken, med dine egne ord. Hvis du kaller den på nytt for en fulgt pakke, erstattes innholdet; en tom tekst fjerner det."
+    },
+    "update_contents": {
+      "name": "Oppdater pakkens innhold",
+      "description": "Angi med dine egne ord hva som er i en pakke, for et sporingsnummer. En tom tekst fjerner innholdet."
+    },
+    "update_contents_contents": {
+      "name": "Innhold",
+      "description": "Hva som er i pakken, med dine egne ord. En tom tekst fjerner det."
+    },
+    "code_field": {
+      "name": "Sporingsnummer",
+      "description": "Pakkens sporingsnummer."
+    }
+  },
+  "lv": {
+    "track_parcel_contents": {
+      "name": "Saturs",
+      "description": "Kas ir sūtījumā, saviem vārdiem. Atkārtota izsaukšana sekotam sūtījumam saturu aizstāj; tukšs teksts to izdzēš."
+    },
+    "update_contents": {
+      "name": "Atjaunināt sūtījuma saturu",
+      "description": "Saviem vārdiem norādiet, kas ir sūtījumā ar šo izsekošanas kodu. Tukšs teksts saturu izdzēš."
+    },
+    "update_contents_contents": {
+      "name": "Saturs",
+      "description": "Kas ir sūtījumā, saviem vārdiem. Tukšs teksts to izdzēš."
+    },
+    "code_field": {
+      "name": "Izsekošanas kods",
+      "description": "Sūtījuma izsekošanas kods."
+    }
+  },
+  "lt": {
+    "track_parcel_contents": {
+      "name": "Turinys",
+      "description": "Kas yra siuntoje, savais žodžiais. Pakartotinai iškvietus sekamai siuntai, turinys pakeičiamas; tuščias tekstas jį ištrina."
+    },
+    "update_contents": {
+      "name": "Atnaujinti siuntos turinį",
+      "description": "Savais žodžiais nurodykite, kas yra siuntoje su šiuo sekimo kodu. Tuščias tekstas turinį ištrina."
+    },
+    "update_contents_contents": {
+      "name": "Turinys",
+      "description": "Kas yra siuntoje, savais žodžiais. Tuščias tekstas jį ištrina."
+    },
+    "code_field": {
+      "name": "Sekimo kodas",
+      "description": "Siuntos sekimo kodas."
+    }
+  },
+  "hr": {
+    "track_parcel_contents": {
+      "name": "Sadržaj",
+      "description": "Što je u paketu, vlastitim riječima. Ponovni poziv za praćeni paket zamjenjuje sadržaj; prazan tekst ga briše."
+    },
+    "update_contents": {
+      "name": "Ažuriraj sadržaj paketa",
+      "description": "Vlastitim riječima postavite što je u paketu s ovim kodom za praćenje. Prazan tekst briše sadržaj."
+    },
+    "update_contents_contents": {
+      "name": "Sadržaj",
+      "description": "Što je u paketu, vlastitim riječima. Prazan tekst ga briše."
+    },
+    "code_field": {
+      "name": "Kod za praćenje",
+      "description": "Kod za praćenje paketa."
+    }
+  },
+  "et": {
+    "track_parcel_contents": {
+      "name": "Sisu",
+      "description": "Mis pakis on, oma sõnadega. Jälgitava pakiga uuesti kutsumine asendab sisu; tühi tekst kustutab selle."
+    },
+    "update_contents": {
+      "name": "Uuenda paki sisu",
+      "description": "Määra oma sõnadega, mis pakis on, jälgimiskoodi järgi. Tühi tekst kustutab sisu."
+    },
+    "update_contents_contents": {
+      "name": "Sisu",
+      "description": "Mis pakis on, oma sõnadega. Tühi tekst kustutab selle."
+    },
+    "code_field": {
+      "name": "Jälgimiskood",
+      "description": "Paki jälgimiskood."
+    }
+  },
+  "el": {
+    "track_parcel_contents": {
+      "name": "Περιεχόμενο",
+      "description": "Τι περιέχει το δέμα, με δικά σας λόγια. Μια νέα κλήση για δέμα που παρακολουθείται αντικαθιστά το περιεχόμενο· ένα κενό κείμενο το διαγράφει."
+    },
+    "update_contents": {
+      "name": "Ενημέρωση περιεχομένου δέματος",
+      "description": "Ορίστε, με δικά σας λόγια, τι περιέχει ένα δέμα για έναν κωδικό παρακολούθησης. Ένα κενό κείμενο διαγράφει το περιεχόμενο."
+    },
+    "update_contents_contents": {
+      "name": "Περιεχόμενο",
+      "description": "Τι περιέχει το δέμα, με δικά σας λόγια. Ένα κενό κείμενο το διαγράφει."
+    },
+    "code_field": {
+      "name": "Κωδικός παρακολούθησης",
+      "description": "Ο κωδικός παρακολούθησης του δέματος."
+    }
+  },
+  "bg": {
+    "track_parcel_contents": {
+      "name": "Съдържание",
+      "description": "Какво има в пратката, със свои думи. Повторното извикване за проследявана пратка заменя съдържанието; празен текст го изчиства."
+    },
+    "update_contents": {
+      "name": "Обновяване на съдържанието на пратката",
+      "description": "Задайте със свои думи какво има в пратка с даден код за проследяване. Празен текст изчиства съдържанието."
+    },
+    "update_contents_contents": {
+      "name": "Съдържание",
+      "description": "Какво има в пратката, със свои думи. Празен текст го изчиства."
+    },
+    "code_field": {
+      "name": "Код за проследяване",
+      "description": "Кодът за проследяване на пратката."
+    }
+  },
+  "uk": {
+    "track_parcel_contents": {
+      "name": "Вміст",
+      "description": "Що є в посилці, вашими словами. Повторний виклик для посилки, що відстежується, замінює вміст; порожній текст його очищає."
+    },
+    "update_contents": {
+      "name": "Оновити вміст посилки",
+      "description": "Вкажіть своїми словами, що є в посилці, для коду відстеження. Порожній текст очищає вміст."
+    },
+    "update_contents_contents": {
+      "name": "Вміст",
+      "description": "Що є в посилці, вашими словами. Порожній текст його очищає."
+    },
+    "code_field": {
+      "name": "Код відстеження",
+      "description": "Код відстеження посилки."
+    }
+  },
+  "ga": {
+    "track_parcel_contents": {
+      "name": "Ábhar",
+      "description": "Cad atá sa phacáiste, i d'fhocail féin. Má ghlaonn tú arís é do phacáiste atá á rianú, cuirtear ábhar nua in ionad an ábhair; glanann téacs folamh é."
+    },
+    "update_contents": {
+      "name": "Nuashonraigh ábhar an phacáiste",
+      "description": "Socraigh, i d'fhocail féin, cad atá i bpacáiste le cód rianaithe. Glanann téacs folamh an t-ábhar."
+    },
+    "update_contents_contents": {
+      "name": "Ábhar",
+      "description": "Cad atá sa phacáiste, i d'fhocail féin. Glanann téacs folamh é."
+    },
+    "code_field": {
+      "name": "Cód rianaithe",
+      "description": "Cód rianaithe an phacáiste."
+    }
+  },
+  "hi": {
+    "track_parcel_contents": {
+      "name": "सामग्री",
+      "description": "पार्सल में क्या है, अपने शब्दों में। ट्रैक किए जा रहे पार्सल के लिए इसे दोबारा चलाने पर सामग्री बदल जाती है; खाली टेक्स्ट उसे हटा देता है।"
+    },
+    "update_contents": {
+      "name": "पार्सल की सामग्री अपडेट करें",
+      "description": "ट्रैकिंग कोड वाले पार्सल में क्या है, यह अपने शब्दों में तय करें। खाली टेक्स्ट सामग्री को हटा देता है।"
+    },
+    "update_contents_contents": {
+      "name": "सामग्री",
+      "description": "पार्सल में क्या है, अपने शब्दों में। खाली टेक्स्ट उसे हटा देता है।"
+    },
+    "code_field": {
+      "name": "ट्रैकिंग कोड",
+      "description": "पार्सल का ट्रैकिंग कोड।"
+    }
+  },
+  "vi": {
+    "track_parcel_contents": {
+      "name": "Nội dung",
+      "description": "Những gì có trong bưu kiện, bằng lời của bạn. Gọi lại cho một bưu kiện đang theo dõi sẽ thay thế nội dung; văn bản trống sẽ xóa nội dung."
+    },
+    "update_contents": {
+      "name": "Cập nhật nội dung bưu kiện",
+      "description": "Đặt nội dung của một bưu kiện theo mã theo dõi, bằng lời của bạn. Văn bản trống sẽ xóa nội dung."
+    },
+    "update_contents_contents": {
+      "name": "Nội dung",
+      "description": "Những gì có trong bưu kiện, bằng lời của bạn. Văn bản trống sẽ xóa nội dung."
+    },
+    "code_field": {
+      "name": "Mã theo dõi",
+      "description": "Mã theo dõi của bưu kiện."
+    }
+  },
+  "th": {
+    "track_parcel_contents": {
+      "name": "สิ่งของในพัสดุ",
+      "description": "สิ่งที่อยู่ในพัสดุ ด้วยคำพูดของคุณเองการเรียกซ้ำสำหรับพัสดุที่ติดตามอยู่จะแทนที่ข้อมูลเดิม ข้อความว่างจะล้างข้อมูล"
+    },
+    "update_contents": {
+      "name": "อัปเดตสิ่งของในพัสดุ",
+      "description": "ตั้งค่าว่ามีอะไรอยู่ในพัสดุตามหมายเลขติดตาม ด้วยคำพูดของคุณเอง ข้อความว่างจะล้างข้อมูล"
+    },
+    "update_contents_contents": {
+      "name": "สิ่งของในพัสดุ",
+      "description": "สิ่งที่อยู่ในพัสดุ ด้วยคำพูดของคุณเองข้อความว่างจะล้างข้อมูล"
+    },
+    "code_field": {
+      "name": "หมายเลขติดตาม",
+      "description": "หมายเลขติดตามของพัสดุ"
+    }
+  },
+  "id": {
+    "track_parcel_contents": {
+      "name": "Isi",
+      "description": "Isi paket, dengan kata-katamu sendiri. Memanggil ulang untuk paket yang dilacak akan menggantikan isinya; teks kosong menghapusnya."
+    },
+    "update_contents": {
+      "name": "Perbarui isi paket",
+      "description": "Atur isi paket untuk sebuah kode pelacakan, dengan kata-katamu sendiri. Teks kosong menghapus isinya."
+    },
+    "update_contents_contents": {
+      "name": "Isi",
+      "description": "Isi paket, dengan kata-katamu sendiri. Teks kosong menghapusnya."
+    },
+    "code_field": {
+      "name": "Kode pelacakan",
+      "description": "Kode pelacakan paket."
+    }
+  },
+  "sr-Latn": {
+    "track_parcel_contents": {
+      "name": "Sadržaj",
+      "description": "Šta je u paketu, sopstvenim rečima. Ponovni poziv za praćeni paket zamenjuje sadržaj; prazan tekst ga briše."
+    },
+    "update_contents": {
+      "name": "Ažuriraj sadržaj paketa",
+      "description": "Sopstvenim rečima podesite šta je u paketu sa ovim kodom za praćenje. Prazan tekst briše sadržaj."
+    },
+    "update_contents_contents": {
+      "name": "Sadržaj",
+      "description": "Šta je u paketu, sopstvenim rečima. Prazan tekst ga briše."
+    },
+    "code_field": {
+      "name": "Kod za praćenje",
+      "description": "Kod za praćenje paketa."
+    }
+  },
+  "sr": {
+    "track_parcel_contents": {
+      "name": "Садржај",
+      "description": "Шта је у пакету, сопственим речима. Поновни позив за праћени пакет замењује садржај; празан текст га брише."
+    },
+    "update_contents": {
+      "name": "Ажурирај садржај пакета",
+      "description": "Сопственим речима подесите шта је у пакету са овим кодом за праћење. Празан текст брише садржај."
+    },
+    "update_contents_contents": {
+      "name": "Садржај",
+      "description": "Шта је у пакету, сопственим речима. Празан текст га брише."
+    },
+    "code_field": {
+      "name": "Код за праћење",
+      "description": "Код за праћење пакета."
+    }
+  },
+  "zh-Hant": {
+    "track_parcel_contents": {
+      "name": "內容物",
+      "description": "包裹裡有什麼，用你自己的話描述。對已追蹤的包裹再次呼叫會取代內容；留空則會清除。"
+    },
+    "update_contents": {
+      "name": "更新包裹內容",
+      "description": "依追蹤編號，用你自己的話設定包裹裡有什麼。留空則會清除內容。"
+    },
+    "update_contents_contents": {
+      "name": "內容物",
+      "description": "包裹裡有什麼，用你自己的話描述。留空則會清除。"
+    },
+    "code_field": {
+      "name": "追蹤編號",
+      "description": "包裹的追蹤編號。"
+    }
+  },
+  "ja": {
+    "track_parcel_contents": {
+      "name": "内容",
+      "description": "荷物の中身を、自分の言葉で入力します。追跡中の荷物に対して再度実行すると内容が置き換わり、空のテキストを指定すると消去されます。"
+    },
+    "update_contents": {
+      "name": "荷物の内容を更新",
+      "description": "追跡番号に対して、荷物の中身を自分の言葉で設定します。空のテキストを指定すると消去されます。"
+    },
+    "update_contents_contents": {
+      "name": "内容",
+      "description": "荷物の中身を、自分の言葉で入力します。空のテキストを指定すると消去されます。"
+    },
+    "code_field": {
+      "name": "追跡番号",
+      "description": "荷物の追跡番号。"
+    }
+  }
+}

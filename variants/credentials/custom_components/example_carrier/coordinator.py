@@ -34,6 +34,7 @@ from .const import (
     STAGGER_MINUTES,
     ParcelStatus,
 )
+from .contents import ContentsStore
 from .parcels import apply_delivered_filter, normalize_parcel, sort_parcels_by_ts
 
 _LOGGER = logging.getLogger(__name__)
@@ -138,6 +139,7 @@ class ExampleCarrierCoordinator(DataUpdateCoordinator[list[dict]]):
             update_interval=timedelta(minutes=HOT_INTERVAL_MINUTES),
         )
         self._client = client
+        self.contents_store = ContentsStore(hass, entry.entry_id)
         self.delivered: list[dict] = []
         # Consecutive 429 responses, for the exponential backoff in Section 3.
         # Reset to 0 on any success.
@@ -158,6 +160,14 @@ class ExampleCarrierCoordinator(DataUpdateCoordinator[list[dict]]):
         self._cached_device_id: str | None = None
         # Timestamp of the last successful poll (diagnostic sensor).
         self.last_success_time: datetime | None = None
+
+    def _apply_contents(self, parcel: dict) -> dict:
+        """Put the user's own contents text over the carrier's, when there is one."""
+        barcode = parcel.get("barcode")
+        user_value = self.contents_store.get(barcode) if barcode else None
+        if user_value is not None:
+            parcel["contents"] = user_value
+        return parcel
 
     @property
     def current_tier_minutes(self) -> int | None:
@@ -232,7 +242,8 @@ class ExampleCarrierCoordinator(DataUpdateCoordinator[list[dict]]):
 
         include_history = self._include_history
         normalized = [
-            normalize_parcel(raw, include_history=include_history) for raw in raws
+            self._apply_contents(normalize_parcel(raw, include_history=include_history))
+            for raw in raws
         ]
         active = [parcel for parcel in normalized if not parcel["delivered"]]
         delivered = [parcel for parcel in normalized if parcel["delivered"]]

@@ -67,7 +67,8 @@ Samples live in `tests/payloads.py`, not inline in test modules.
 `custom_components/example_carrier/api.py`. `variants/<auth>/remove.txt`
 lists paths deleted after the overlay is applied (one per line, `#` comments
 allowed) — optional; `variants/byo-key/` has nothing to remove, since it keeps
-the account-less `track_parcel`/`untrack_parcel` services. Use an overlay when
+the account-less `track_parcel`/`untrack_parcel` services; `variants/credentials/`
+replaces `services.py` with an `update_contents`-only one. Use an overlay when
 a whole file differs.
 
 **Variant markers** — `# >>> variant: <tag>` … `# <<< variant: <tag>` (or
@@ -104,3 +105,12 @@ python -m pytest tests/ --cov=custom_components.example_carrier
 
 Coverage must stay above 95% — the generated repos inherit both the suite and
 the standard.
+
+## Contents translations
+
+`scripts/contents_translations.json` is the one canonical wording of the
+`contents` service strings, per language code. Implementers never translate:
+`python scripts/apply_contents_translations.py <repo>/custom_components/<domain>/translations --copy-fields <code field>[,<entry field>]`
+merges it into every translation file (the code and entry fields are copied from
+that file's own `track_parcel`), then `cp translations/en.json strings.json`.
+A language that is not in the table makes the script stop; add it there first.

@@ -56,6 +56,7 @@ A custom Home Assistant integration that tracks your [Example Carrier](https://e
 - Summary sensors: incoming parcels, next delivery, recently delivered parcels
 - Read-only **Deliveries** calendar with the expected delivery windows
 - `example_carrier.track_parcel` / `example_carrier.untrack_parcel` services, so a dashboard button can add a parcel
+- A `contents` field on every parcel, set in your own words with the `example_carrier.update_contents` service
 - Events + device triggers for no-code automations (parcel registered, status changed, delivered, delivery time changed)
 - Opt-in per-parcel status history
 - Manual refresh button and a diagnostic last-update sensor
@@ -209,8 +210,9 @@ Every payload is the full normalised parcel plus the hub's `device_id`. Events a
 
 | Service | Fields | Description |
 |---|---|---|
-| `example_carrier.track_parcel` | `tracking_code` | Start tracking a parcel |
+| `example_carrier.track_parcel` | `tracking_code`, `contents` (optional) | Start tracking a parcel, optionally noting what is in it |
 | `example_carrier.untrack_parcel` | `tracking_code` | Stop tracking a parcel |
+| `example_carrier.update_contents` | `tracking_code`, `contents` | Set what is in a parcel, tracked or not; an empty `contents` clears it |
 
 ## Examples
 

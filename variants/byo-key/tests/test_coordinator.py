@@ -4,7 +4,7 @@ The parcel mapping itself is covered by ``test_parcels.py``.
 """
 
 import asyncio
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, patch
 
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers import device_registry as dr
@@ -25,10 +25,12 @@ from custom_components.example_carrier.const import (
     ParcelStatus,
 )
 from custom_components.example_carrier.coordinator import ExampleCarrierCoordinator
+from custom_components.example_carrier.parcels import normalize_parcel
 
 from .payloads import ACTIVE_CODE, DELIVERED_CODE, active_sample, delivered_sample
 
 OTHER_CODE = "EXAMPLE888888"
+COORDINATOR = "custom_components.example_carrier.coordinator"
 
 
 def _entry_with(parcels: list[dict]) -> MockConfigEntry:
@@ -550,3 +552,68 @@ async def test_a_parcel_the_delivered_list_leaves_out_still_fires_delivered(hass
         [ACTIVE_CODE, OTHER_CODE]
     )
     assert [parcel["barcode"] for parcel in coordinator.delivered] == [OTHER_CODE]
+
+
+# ---------------------------------------------------------------------------
+# contents overlay
+# ---------------------------------------------------------------------------
+
+
+def _carrier_text(raw: dict, **kwargs) -> dict:
+    parcel = normalize_parcel(raw, **kwargs)
+    parcel["contents"] = "Carrier text"
+    return parcel
+
+
+async def test_user_contents_overlays_the_carrier_value(hass):
+    entry = _entry_with([{CONF_TRACKING_CODE: ACTIVE_CODE}])
+    entry.add_to_hass(hass)
+    client = AsyncMock()
+    client.async_get_parcel.return_value = active_sample()
+    coordinator = ExampleCarrierCoordinator(hass, client, entry)
+
+    with patch(f"{COORDINATOR}.normalize_parcel", side_effect=_carrier_text):
+        data = await coordinator._async_update_data()
+        assert data[0]["contents"] == "Carrier text"
+
+        coordinator.contents_store.async_set(ACTIVE_CODE, "Running shoes")
+        data = await coordinator._async_update_data()
+        assert data[0]["contents"] == "Running shoes"
+
+        coordinator.contents_store.async_set(ACTIVE_CODE, None)
+        data = await coordinator._async_update_data()
+        assert data[0]["contents"] == "Carrier text"
+
+
+async def test_user_contents_is_keyed_on_the_requested_code(hass):
+    """A response carrying another number still finds the value stored for the code."""
+    entry = _entry_with([{CONF_TRACKING_CODE: ACTIVE_CODE}])
+    entry.add_to_hass(hass)
+    client = AsyncMock()
+    client.async_get_parcel.return_value = active_sample("EXAMPLE000777")
+    coordinator = ExampleCarrierCoordinator(hass, client, entry)
+    coordinator.contents_store.async_set(ACTIVE_CODE, "Running shoes")
+
+    data = await coordinator._async_update_data()
+
+    assert data[0]["barcode"] == "EXAMPLE000777"
+    assert data[0]["contents"] == "Running shoes"
+
+
+async def test_user_contents_reaches_the_delivered_list_and_events(hass):
+    entry = _entry_with([{CONF_TRACKING_CODE: ACTIVE_CODE}])
+    entry.add_to_hass(hass)
+    client = AsyncMock()
+    coordinator = ExampleCarrierCoordinator(hass, client, entry)
+    coordinator.contents_store.async_set(ACTIVE_CODE, "Running shoes")
+    delivered = []
+    hass.bus.async_listen(f"{DOMAIN}_parcel_delivered", lambda e: delivered.append(e))
+
+    client.async_get_parcel.return_value = active_sample(ACTIVE_CODE)
+    await coordinator._async_update_data()
+    client.async_get_parcel.return_value = delivered_sample(ACTIVE_CODE)
+    await coordinator._async_update_data()
+    await hass.async_block_till_done()
+
+    assert coordinator.delivered[0]["contents"] == "Running shoes"
+    assert delivered[0].data["contents"] == "Running shoes"

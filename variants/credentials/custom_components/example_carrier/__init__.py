@@ -7,7 +7,7 @@ import logging
 from typing import Any
 
 import aiohttp
-from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import ConfigEntry, ConfigEntryState
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
@@ -18,8 +18,10 @@ from .api import (
     ExampleCarrierApiError,
     ExampleCarrierAuthError,
 )
-from .const import PLATFORMS
+from .const import DOMAIN, PLATFORMS
+from .contents import ContentsStore
 from .coordinator import ExampleCarrierCoordinator
+from .services import async_setup_services, async_unload_services
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -66,6 +68,7 @@ async def async_setup_entry(
         raise ConfigEntryNotReady("Example Carrier login failed") from err
 
     coordinator = ExampleCarrierCoordinator(hass, client, entry)
+    await coordinator.contents_store.async_load()
 
     try:
         # Fetch initial data here, before forwarding to platforms. Raising
@@ -89,6 +92,8 @@ async def async_setup_entry(
         await session.close()
         raise
 
+    async_setup_services(hass)
+
     # No entry.add_update_listener: the options flow is an
     # OptionsFlowWithReload, which may not be combined with one.
     return True
@@ -100,5 +105,19 @@ async def async_unload_entry(
     """Unload an Example Carrier config entry."""
     if await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
         await entry.runtime_data.session.close()
+        # The services are shared by every account, so they go with the last one.
+        if not any(
+            other.state is ConfigEntryState.LOADED
+            for other in hass.config_entries.async_entries(DOMAIN)
+            if other.entry_id != entry.entry_id
+        ):
+            async_unload_services(hass)
         return True
     return False
+
+
+async def async_remove_entry(
+    hass: HomeAssistant, entry: ExampleCarrierConfigEntry
+) -> None:
+    """Delete the contents the user set for the removed entry."""
+    await ContentsStore(hass, entry.entry_id).async_remove()

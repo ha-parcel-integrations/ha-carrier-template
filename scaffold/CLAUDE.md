@@ -260,7 +260,8 @@ repo's own `CLAUDE.md` — not a generator flag.
 | `sensor.py` / `button.py` / `calendar.py` / `device_trigger.py` | no |
 | `device.py` (shared device-info helper) | no |
 | `diagnostics.py` | partly (`TO_REDACT`) |
-| `services.py` (`track_parcel` / `untrack_parcel`, account-less only) | no |
+| `contents.py` (`clean_contents`, `join_contents`, `normalize_code`, `ContentsStore`) | no — identical in every carrier |
+| `services.py` (`track_parcel` / `untrack_parcel`, account-less only; `update_contents` in every build) | no |
 
 `parcels.py` is deliberately free of I/O and HA objects so the per-carrier part
 stays unit-testable without Home Assistant. Config: `ConfigEntry.runtime_data`
@@ -271,6 +272,33 @@ loop (one bad parcel doesn't fail the poll) but **not** around the whole update
 `icons.json`, translated units, `_attr_attribution`, `_unrecorded_attributes` on
 anything with a parcel list or `raw`. Over-redact diagnostics — they get pasted
 into public issues.
+
+## Parcel contents
+
+`contents` is a short string describing what is in the parcel, right after
+`receiver` in every normaliser, `None` when unknown, never `""`. Three rules:
+
+- **Precedence**: the user's value (set with `update_contents`, or the optional
+  `contents` field on `track_parcel`) beats a label the user gave the parcel in
+  the carrier's own account, which beats the carrier's own item text.
+  `normalize_parcel` stays pure and fills only the last two, through
+  `clean_contents` / `join_contents`; the coordinator overlays the user's value
+  straight after normalising, before sorting, events and the delivered split,
+  keyed on the code the parcel was requested with (the barcode on an account
+  feed).
+- **Storage** is one `Store` per config entry (`ContentsStore`, key
+  `<domain>.contents.<entry_id>`, 200 codes, oldest dropped first). Nothing goes
+  into `options`, so the options flow, its reload and any migration are never
+  involved. `untrack_parcel` drops a code's value, `async_remove_entry` the file.
+- **Capability**: declare `"contents"` in `CAPABILITIES` only where the carrier
+  itself fills it (a user label counts); user-supplied text alone is not one.
+  A carrier's generic text ("Consumer goods") maps to `None`: pass a
+  `CONTENTS_FILLER` frozenset of casefolded strings to `clean_contents` rather
+  than filtering by hand. The carrier's own field stays untouched in `raw`.
+
+`contents` is free text about what someone bought: it is in `TO_REDACT`, and no
+test or fixture carries a real value. A change to `contents` alone fires no
+event.
 
 ## Running tests
 

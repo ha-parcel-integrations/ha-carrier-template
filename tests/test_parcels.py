@@ -167,6 +167,7 @@ CANONICAL_KEYS = [
     "barcode",
     "sender",
     "receiver",
+    "contents",
     "status",
     "raw_status",
     "delivered",
@@ -222,6 +223,10 @@ def test_capabilities_match_what_normalize_parcel_actually_returns():
         assert delivered["url"] is not None
     if "history" in CAPABILITIES:
         assert with_history["history"] is not None
+    if "contents" in CAPABILITIES:
+        assert any(
+            parcel["contents"] is not None for parcel in (delivered, active, pickup)
+        )
 
 
 def test_normalize_delivered_parcel():

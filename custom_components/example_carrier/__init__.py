@@ -12,6 +12,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import ExampleCarrierApiClient
 from .const import PLATFORMS
+from .contents import ContentsStore
 from .coordinator import ExampleCarrierCoordinator
 from .services import async_setup_services, async_unload_services
 
@@ -39,6 +40,8 @@ async def async_setup_entry(
     # No auth: Example Carrier tracking is public, so the HA-managed session is fine.
     client = ExampleCarrierApiClient(async_get_clientsession(hass))
     coordinator = ExampleCarrierCoordinator(hass, client, entry)
+
+    await coordinator.contents_store.async_load()
 
     # Fetch initial data here, before forwarding to platforms. Raising
     # ConfigEntryNotReady from a forwarded platform is too late for HA to catch
@@ -95,3 +98,10 @@ async def async_unload_entry(
     # always go when the entry unloads.
     async_unload_services(hass)
     return True
+
+
+async def async_remove_entry(
+    hass: HomeAssistant, entry: ExampleCarrierConfigEntry
+) -> None:
+    """Delete the contents the user set for the removed entry."""
+    await ContentsStore(hass, entry.entry_id).async_remove()

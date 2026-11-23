@@ -33,7 +33,15 @@ PLATFORMS = [Platform.BUTTON, Platform.CALENDAR, Platform.SENSOR]
 # subset of this — it exists so a typo in CAPABILITIES fails a test instead of
 # silently dropping a carrier off a table on the docs site.
 KNOWN_CAPABILITIES = frozenset(
-    {"weight", "dimensions", "delivery_window", "pickup_point", "url", "history"}
+    {
+        "weight",
+        "dimensions",
+        "delivery_window",
+        "pickup_point",
+        "url",
+        "history",
+        "contents",
+    }
 )
 
 # TODO(carrier): trim this down to what the carrier's API actually exposes.
@@ -51,6 +59,7 @@ KNOWN_CAPABILITIES = frozenset(
 #   "pickup_point"       parcel["pickup_point"] is ever non-null (beyond the "pickup" bool)
 #   "url"                parcel["url"] is ever non-null
 #   "history"            the include_history option is implemented and does something
+#   "contents"           parcel["contents"] is ever filled by the carrier (user-supplied text does not count)
 CAPABILITIES = frozenset(
     {"weight", "dimensions", "delivery_window", "pickup_point", "url", "history"}
 )
@@ -112,6 +121,7 @@ CONF_API_KEY = "api_key"
 # slot in without an options migration.
 CONF_PARCELS = "parcels"
 CONF_TRACKING_CODE = "tracking_code"
+CONF_CONTENTS = "contents"
 
 # Delivered-parcels retention: keep delivered parcels visible for the last N
 # days, or keep only the N most recent — identical across the suite.
