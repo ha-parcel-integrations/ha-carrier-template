@@ -34,6 +34,11 @@ event contract, the sensor set, the sort rules — is a **suite-wide** change:
 
 1. Make it here first, with tests.
 2. Note it in `scaffold/CLAUDE.md` so generated repos carry the reasoning.
+   Update the user-facing docs in the same change: `scaffold/README.md` (feature
+   list, parcel-fields table, a row per service with **every** field, and where
+   the value shows up: calendar, sensors). A service field that only reaches
+   `services.yaml` and the translations is a doc bug; `tools/readme_services_report.py`
+   (run from the umbrella, `--check` exits 1) lists any repo whose README misses one.
 3. Only then roll it out to the existing carrier repos, one PR each.
 
 Going the other way (fixing a carrier repo and forgetting the template) is how
