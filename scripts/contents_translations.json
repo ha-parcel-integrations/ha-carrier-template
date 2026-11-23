@@ -15,6 +15,13 @@
     "code_field": {
       "name": "Tracking code",
       "description": "The tracking code of the parcel."
+    },
+    "config_entry_id_field": {
+      "name": "Account",
+      "description": "The account to store this for. Needed when no account lists the code yet."
+    },
+    "entry_required_exception": {
+      "message": "No account lists this code. Choose the account to store it for."
     }
   },
   "nl": {
@@ -33,6 +40,13 @@
     "code_field": {
       "name": "Trackingcode",
       "description": "De trackingcode van het pakket."
+    },
+    "config_entry_id_field": {
+      "name": "Account",
+      "description": "Het account waarvoor dit wordt opgeslagen. Nodig als geen account de code al kent."
+    },
+    "entry_required_exception": {
+      "message": "Geen enkel account kent deze code. Kies het account waarvoor je dit wilt opslaan."
     }
   },
   "fr": {
@@ -51,6 +65,13 @@
     "code_field": {
       "name": "Numéro de suivi",
       "description": "Le numéro de suivi du colis."
+    },
+    "config_entry_id_field": {
+      "name": "Compte",
+      "description": "Le compte pour lequel enregistrer cette valeur. Requis quand aucun compte ne connaît encore le code."
+    },
+    "entry_required_exception": {
+      "message": "Aucun compte ne connaît ce code. Choisissez le compte pour lequel l'enregistrer."
     }
   },
   "es": {
@@ -69,6 +90,13 @@
     "code_field": {
       "name": "Código de seguimiento",
       "description": "El código de seguimiento del paquete."
+    },
+    "config_entry_id_field": {
+      "name": "Cuenta",
+      "description": "La cuenta para la que guardar esto. Necesaria cuando ninguna cuenta conoce aún el código."
+    },
+    "entry_required_exception": {
+      "message": "Ninguna cuenta conoce este código. Elige la cuenta para la que guardarlo."
     }
   },
   "it": {
@@ -87,6 +115,13 @@
     "code_field": {
       "name": "Codice di tracciamento",
       "description": "Il codice di tracciamento del pacco."
+    },
+    "config_entry_id_field": {
+      "name": "Account",
+      "description": "L'account per cui salvare il valore. Necessario quando nessun account conosce ancora il codice."
+    },
+    "entry_required_exception": {
+      "message": "Nessun account conosce questo codice. Scegli l'account per cui salvarlo."
     }
   },
   "de": {
@@ -105,6 +140,13 @@
     "code_field": {
       "name": "Sendungsnummer",
       "description": "Die Sendungsnummer des Pakets."
+    },
+    "config_entry_id_field": {
+      "name": "Konto",
+      "description": "Das Konto, für das dies gespeichert wird. Nötig, wenn noch kein Konto den Code kennt."
+    },
+    "entry_required_exception": {
+      "message": "Kein Konto kennt diesen Code. Wähle das Konto, für das er gespeichert werden soll."
     }
   },
   "pt": {
@@ -123,6 +165,13 @@
     "code_field": {
       "name": "Código de seguimento",
       "description": "O código de seguimento da encomenda."
+    },
+    "config_entry_id_field": {
+      "name": "Conta",
+      "description": "A conta para a qual guardar isto. Necessária quando nenhuma conta conhece ainda o código."
+    },
+    "entry_required_exception": {
+      "message": "Nenhuma conta conhece este código. Escolha a conta para a qual o guardar."
     }
   },
   "pt-BR": {
@@ -141,6 +190,13 @@
     "code_field": {
       "name": "Código de rastreamento",
       "description": "O código de rastreamento do pacote."
+    },
+    "config_entry_id_field": {
+      "name": "Conta",
+      "description": "A conta para a qual salvar isto. Necessária quando nenhuma conta conhece o código ainda."
+    },
+    "entry_required_exception": {
+      "message": "Nenhuma conta conhece este código. Escolha a conta para a qual salvá-lo."
     }
   },
   "pl": {
@@ -159,6 +215,13 @@
     "code_field": {
       "name": "Numer śledzenia",
       "description": "Numer śledzenia paczki."
+    },
+    "config_entry_id_field": {
+      "name": "Konto",
+      "description": "Konto, dla którego zapisać wartość. Wymagane, gdy żadne konto jeszcze nie zna kodu."
+    },
+    "entry_required_exception": {
+      "message": "Żadne konto nie zna tego kodu. Wybierz konto, dla którego go zapisać."
     }
   },
   "sv": {
@@ -177,6 +240,13 @@
     "code_field": {
       "name": "Spårningsnummer",
       "description": "Paketets spårningsnummer."
+    },
+    "config_entry_id_field": {
+      "name": "Konto",
+      "description": "Kontot som värdet sparas för. Krävs när inget konto känner till koden än."
+    },
+    "entry_required_exception": {
+      "message": "Inget konto känner till den här koden. Välj kontot att spara den för."
     }
   },
   "sk": {
@@ -195,6 +265,13 @@
     "code_field": {
       "name": "Sledovacie číslo",
       "description": "Sledovacie číslo balíka."
+    },
+    "config_entry_id_field": {
+      "name": "Účet",
+      "description": "Účet, pre ktorý sa hodnota uloží. Potrebné, keď kód ešte nepozná žiadny účet."
+    },
+    "entry_required_exception": {
+      "message": "Tento kód nepozná žiadny účet. Vyberte účet, pre ktorý ho uložiť."
     }
   },
   "hu": {
@@ -213,6 +290,13 @@
     "code_field": {
       "name": "Nyomkövetési kód",
       "description": "A csomag nyomkövetési kódja."
+    },
+    "config_entry_id_field": {
+      "name": "Fiók",
+      "description": "A fiók, amelyhez az érték mentésre kerül. Akkor kell, ha egyik fiók sem ismeri még a kódot."
+    },
+    "entry_required_exception": {
+      "message": "Egyik fiók sem ismeri ezt a kódot. Válaszd ki a fiókot, amelyhez menteni szeretnéd."
     }
   },
   "fi": {
@@ -231,6 +315,13 @@
     "code_field": {
       "name": "Seurantakoodi",
       "description": "Paketin seurantakoodi."
+    },
+    "config_entry_id_field": {
+      "name": "Tili",
+      "description": "Tili, jolle arvo tallennetaan. Tarvitaan, kun mikään tili ei vielä tunne koodia."
+    },
+    "entry_required_exception": {
+      "message": "Mikään tili ei tunne tätä koodia. Valitse tili, jolle se tallennetaan."
     }
   },
   "da": {
@@ -249,6 +340,13 @@
     "code_field": {
       "name": "Sporingsnummer",
       "description": "Pakkens sporingsnummer."
+    },
+    "config_entry_id_field": {
+      "name": "Konto",
+      "description": "Kontoen, som værdien gemmes for. Kræves, når ingen konto kender koden endnu."
+    },
+    "entry_required_exception": {
+      "message": "Ingen konto kender denne kode. Vælg den konto, den skal gemmes for."
     }
   },
   "cs": {
@@ -267,6 +365,13 @@
     "code_field": {
       "name": "Sledovací číslo",
       "description": "Sledovací číslo balíku."
+    },
+    "config_entry_id_field": {
+      "name": "Účet",
+      "description": "Účet, pro který se hodnota uloží. Potřebné, když kód zatím nezná žádný účet."
+    },
+    "entry_required_exception": {
+      "message": "Tento kód nezná žádný účet. Vyberte účet, pro který ho uložit."
     }
   },
   "sl": {
@@ -285,6 +390,13 @@
     "code_field": {
       "name": "Sledilna koda",
       "description": "Sledilna koda paketa."
+    },
+    "config_entry_id_field": {
+      "name": "Račun",
+      "description": "Račun, za katerega se vrednost shrani. Potreben, ko kode še ne pozna noben račun."
+    },
+    "entry_required_exception": {
+      "message": "Nobeden račun ne pozna te kode. Izberite račun, za katerega jo shranite."
     }
   },
   "ro": {
@@ -303,6 +415,13 @@
     "code_field": {
       "name": "Cod de urmărire",
       "description": "Codul de urmărire al coletului."
+    },
+    "config_entry_id_field": {
+      "name": "Cont",
+      "description": "Contul pentru care se salvează valoarea. Necesar când niciun cont nu cunoaște încă codul."
+    },
+    "entry_required_exception": {
+      "message": "Niciun cont nu cunoaște acest cod. Alege contul pentru care îl salvezi."
     }
   },
   "nb": {
@@ -321,6 +440,13 @@
     "code_field": {
       "name": "Sporingsnummer",
       "description": "Pakkens sporingsnummer."
+    },
+    "config_entry_id_field": {
+      "name": "Konto",
+      "description": "Kontoen verdien lagres for. Kreves når ingen konto kjenner koden ennå."
+    },
+    "entry_required_exception": {
+      "message": "Ingen konto kjenner denne koden. Velg kontoen den skal lagres for."
     }
   },
   "lv": {
@@ -339,6 +465,13 @@
     "code_field": {
       "name": "Izsekošanas kods",
       "description": "Sūtījuma izsekošanas kods."
+    },
+    "config_entry_id_field": {
+      "name": "Konts",
+      "description": "Konts, kuram vērtību saglabāt. Nepieciešams, ja neviens konts vēl nepazīst kodu."
+    },
+    "entry_required_exception": {
+      "message": "Neviens konts nepazīst šo kodu. Izvēlieties kontu, kuram to saglabāt."
     }
   },
   "lt": {
@@ -357,6 +490,13 @@
     "code_field": {
       "name": "Sekimo kodas",
       "description": "Siuntos sekimo kodas."
+    },
+    "config_entry_id_field": {
+      "name": "Paskyra",
+      "description": "Paskyra, kuriai reikšmė išsaugoma. Reikalinga, kai nė viena paskyra dar nežino kodo."
+    },
+    "entry_required_exception": {
+      "message": "Nė viena paskyra nežino šio kodo. Pasirinkite paskyrą, kuriai jį išsaugoti."
     }
   },
   "hr": {
@@ -375,6 +515,13 @@
     "code_field": {
       "name": "Kod za praćenje",
       "description": "Kod za praćenje paketa."
+    },
+    "config_entry_id_field": {
+      "name": "Račun",
+      "description": "Račun za koji se vrijednost sprema. Potreban kada nijedan račun još ne poznaje kod."
+    },
+    "entry_required_exception": {
+      "message": "Nijedan račun ne poznaje ovaj kod. Odaberite račun za koji ga želite spremiti."
     }
   },
   "et": {
@@ -393,6 +540,13 @@
     "code_field": {
       "name": "Jälgimiskood",
       "description": "Paki jälgimiskood."
+    },
+    "config_entry_id_field": {
+      "name": "Konto",
+      "description": "Konto, mille jaoks väärtus salvestatakse. Vajalik, kui ükski konto ei tunne koodi veel."
+    },
+    "entry_required_exception": {
+      "message": "Ükski konto ei tunne seda koodi. Vali konto, mille jaoks see salvestada."
     }
   },
   "el": {
@@ -411,6 +565,13 @@
     "code_field": {
       "name": "Κωδικός παρακολούθησης",
       "description": "Ο κωδικός παρακολούθησης του δέματος."
+    },
+    "config_entry_id_field": {
+      "name": "Λογαριασμός",
+      "description": "Ο λογαριασμός για τον οποίο θα αποθηκευτεί η τιμή. Απαιτείται όταν κανένας λογαριασμός δεν γνωρίζει ακόμη τον κωδικό."
+    },
+    "entry_required_exception": {
+      "message": "Κανένας λογαριασμός δεν γνωρίζει αυτόν τον κωδικό. Επιλέξτε τον λογαριασμό για τον οποίο θα αποθηκευτεί."
     }
   },
   "bg": {
@@ -429,6 +590,13 @@
     "code_field": {
       "name": "Код за проследяване",
       "description": "Кодът за проследяване на пратката."
+    },
+    "config_entry_id_field": {
+      "name": "Акаунт",
+      "description": "Акаунтът, за който се запазва стойността. Нужен е, когато нито един акаунт още не познава кода."
+    },
+    "entry_required_exception": {
+      "message": "Нито един акаунт не познава този код. Изберете акаунта, за който да се запази."
     }
   },
   "uk": {
@@ -447,6 +615,13 @@
     "code_field": {
       "name": "Код відстеження",
       "description": "Код відстеження посилки."
+    },
+    "config_entry_id_field": {
+      "name": "Обліковий запис",
+      "description": "Обліковий запис, для якого зберігається значення. Потрібен, коли жоден обліковий запис ще не знає код."
+    },
+    "entry_required_exception": {
+      "message": "Жоден обліковий запис не знає цей код. Виберіть обліковий запис, для якого його зберегти."
     }
   },
   "ga": {
@@ -465,6 +640,13 @@
     "code_field": {
       "name": "Cód rianaithe",
       "description": "Cód rianaithe an phacáiste."
+    },
+    "config_entry_id_field": {
+      "name": "Cuntas",
+      "description": "An cuntas ar chóir an luach a shábháil dó. Riachtanach nuair nach bhfuil an cód ar eolas ag aon chuntas go fóill."
+    },
+    "entry_required_exception": {
+      "message": "Níl an cód seo ar eolas ag aon chuntas. Roghnaigh an cuntas lena shábháil."
     }
   },
   "hi": {
@@ -483,6 +665,13 @@
     "code_field": {
       "name": "ट्रैकिंग कोड",
       "description": "पार्सल का ट्रैकिंग कोड।"
+    },
+    "config_entry_id_field": {
+      "name": "खाता",
+      "description": "वह खाता जिसके लिए यह मान सहेजा जाए। तब ज़रूरी है जब कोई खाता अभी कोड नहीं जानता।"
+    },
+    "entry_required_exception": {
+      "message": "कोई खाता इस कोड को नहीं जानता। वह खाता चुनें जिसके लिए इसे सहेजना है।"
     }
   },
   "vi": {
@@ -501,6 +690,13 @@
     "code_field": {
       "name": "Mã theo dõi",
       "description": "Mã theo dõi của bưu kiện."
+    },
+    "config_entry_id_field": {
+      "name": "Tài khoản",
+      "description": "Tài khoản cần lưu giá trị này. Cần khi chưa có tài khoản nào biết mã này."
+    },
+    "entry_required_exception": {
+      "message": "Không tài khoản nào biết mã này. Hãy chọn tài khoản để lưu."
     }
   },
   "th": {
@@ -519,6 +715,13 @@
     "code_field": {
       "name": "หมายเลขติดตาม",
       "description": "หมายเลขติดตามของพัสดุ"
+    },
+    "config_entry_id_field": {
+      "name": "บัญชี",
+      "description": "บัญชีที่จะบันทึกค่านี้ จำเป็นเมื่อยังไม่มีบัญชีใดรู้จักรหัสนี้"
+    },
+    "entry_required_exception": {
+      "message": "ไม่มีบัญชีใดรู้จักรหัสนี้ โปรดเลือกบัญชีที่จะบันทึก"
     }
   },
   "id": {
@@ -537,6 +740,13 @@
     "code_field": {
       "name": "Kode pelacakan",
       "description": "Kode pelacakan paket."
+    },
+    "config_entry_id_field": {
+      "name": "Akun",
+      "description": "Akun tempat nilai ini disimpan. Diperlukan saat belum ada akun yang mengenal kode ini."
+    },
+    "entry_required_exception": {
+      "message": "Tidak ada akun yang mengenal kode ini. Pilih akun untuk menyimpannya."
     }
   },
   "sr-Latn": {
@@ -555,6 +765,13 @@
     "code_field": {
       "name": "Kod za praćenje",
       "description": "Kod za praćenje paketa."
+    },
+    "config_entry_id_field": {
+      "name": "Nalog",
+      "description": "Nalog za koji se vrednost čuva. Potreban kada nijedan nalog još ne poznaje kôd."
+    },
+    "entry_required_exception": {
+      "message": "Nijedan nalog ne poznaje ovaj kôd. Izaberite nalog za koji ga treba sačuvati."
     }
   },
   "sr": {
@@ -573,6 +790,13 @@
     "code_field": {
       "name": "Код за праћење",
       "description": "Код за праћење пакета."
+    },
+    "config_entry_id_field": {
+      "name": "Налог",
+      "description": "Налог за који се вредност чува. Потребан када ниједан налог још не познаје кôд."
+    },
+    "entry_required_exception": {
+      "message": "Ниједан налог не познаје овај кôд. Изаберите налог за који га треба сачувати."
     }
   },
   "zh-Hant": {
@@ -591,6 +815,13 @@
     "code_field": {
       "name": "追蹤編號",
       "description": "包裹的追蹤編號。"
+    },
+    "config_entry_id_field": {
+      "name": "帳號",
+      "description": "要為其儲存此內容的帳號。當尚無帳號識別此追蹤碼時必填。"
+    },
+    "entry_required_exception": {
+      "message": "沒有任何帳號識別此追蹤碼。請選擇要儲存的帳號。"
     }
   },
   "ja": {
@@ -609,6 +840,13 @@
     "code_field": {
       "name": "追跡番号",
       "description": "荷物の追跡番号。"
+    },
+    "config_entry_id_field": {
+      "name": "アカウント",
+      "description": "この内容を保存するアカウント。どのアカウントにもまだ追跡コードがない場合に必要です。"
+    },
+    "entry_required_exception": {
+      "message": "このコードを持つアカウントがありません。保存先のアカウントを選んでください。"
     }
   }
 }

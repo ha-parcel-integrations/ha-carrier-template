@@ -148,3 +148,4 @@ HISTORY_MAX_EVENTS = 20
 # The user-set parcel contents, and the tracking code the contents action is keyed on.
 CONF_CONTENTS = "contents"
 CONF_TRACKING_CODE = "tracking_code"
+CONF_CONFIG_ENTRY_ID = "config_entry_id"

@@ -16,7 +16,7 @@ from pytest_homeassistant_custom_component.common import (
 from custom_components.example_carrier.const import CONF_TRACKING_CODE, DOMAIN
 from custom_components.example_carrier.coordinator import ExampleCarrierCoordinator
 
-from .payloads import ACTIVE_CODE, active_sample
+from .payloads import ACTIVE_CODE, DELIVERED_CODE, active_sample, delivered_sample
 
 CLIENT = "custom_components.example_carrier.api.ExampleCarrierApiClient"
 REFRESH = f"{ExampleCarrierCoordinator.__module__}.ExampleCarrierCoordinator"
@@ -33,14 +33,17 @@ def _config_entry(email: str = "user@example.test") -> MockConfigEntry:
     )
 
 
-async def _setup(hass, entry: MockConfigEntry | None = None) -> MockConfigEntry:
+async def _setup(
+    hass, entry: MockConfigEntry | None = None, parcels: list[dict] | None = None
+) -> MockConfigEntry:
     entry = entry or _config_entry()
+    parcels = [active_sample()] if parcels is None else parcels
     entry.add_to_hass(hass)
     with (
         patch(f"{CLIENT}.async_login", new=AsyncMock(return_value={})),
         patch(
             f"{CLIENT}.async_get_parcels",
-            new=AsyncMock(return_value=[active_sample()]),
+            new=AsyncMock(return_value=parcels),
         ),
     ):
         assert await hass.config_entries.async_setup(entry.entry_id)
@@ -194,3 +197,135 @@ async def test_a_contents_change_alone_fires_no_event(hass):
     await _call(hass, {CONF_TRACKING_CODE: ACTIVE_CODE, "contents": "Running shoes"})
 
     assert events == []
+
+
+OTHER_CODE = "EXAMPLE777777"
+
+
+def _stored(entry: MockConfigEntry, code: str) -> str | None:
+    return entry.runtime_data.coordinator.contents_store.get(code)
+
+
+async def _two_accounts(hass, first_parcels, second_parcels):
+    first = await _setup(hass, parcels=first_parcels)
+    second = await _setup(hass, _config_entry("other@example.test"), second_parcels)
+    return first, second
+
+
+async def _call_quiet(hass, data: dict) -> AsyncMock:
+    with patch(f"{REFRESH}.async_request_refresh", new=AsyncMock()) as refresh:
+        await hass.services.async_call(DOMAIN, "update_contents", data, blocking=True)
+        await hass.async_block_till_done()
+    return refresh
+
+
+async def test_several_accounts_store_in_the_one_that_lists_the_code(hass):
+    first, second = await _two_accounts(
+        hass, [active_sample()], [active_sample(OTHER_CODE)]
+    )
+
+    refresh = await _call_quiet(
+        hass, {CONF_TRACKING_CODE: OTHER_CODE, "contents": "Shoes"}
+    )
+
+    assert _stored(first, OTHER_CODE) is None
+    assert _stored(second, OTHER_CODE) == "Shoes"
+    assert refresh.await_count == 1
+
+
+async def test_several_accounts_find_a_delivered_parcel(hass):
+    first, second = await _two_accounts(hass, [active_sample()], [delivered_sample()])
+
+    await _call_quiet(hass, {CONF_TRACKING_CODE: DELIVERED_CODE, "contents": "Shoes"})
+
+    assert _stored(first, DELIVERED_CODE) is None
+    assert _stored(second, DELIVERED_CODE) == "Shoes"
+
+
+async def test_a_code_in_two_accounts_is_stored_in_both(hass):
+    first, second = await _two_accounts(hass, [active_sample()], [active_sample()])
+
+    refresh = await _call_quiet(
+        hass, {CONF_TRACKING_CODE: ACTIVE_CODE, "contents": "Shoes"}
+    )
+
+    assert _stored(first, ACTIVE_CODE) == "Shoes"
+    assert _stored(second, ACTIVE_CODE) == "Shoes"
+    assert refresh.await_count == 2
+
+
+async def test_several_accounts_refresh_only_where_the_value_changed(hass):
+    first, second = await _two_accounts(hass, [active_sample()], [active_sample()])
+    first.runtime_data.coordinator.contents_store.async_set(ACTIVE_CODE, "Shoes")
+
+    refresh = await _call_quiet(
+        hass, {CONF_TRACKING_CODE: ACTIVE_CODE, "contents": "Shoes"}
+    )
+
+    assert _stored(second, ACTIVE_CODE) == "Shoes"
+    assert refresh.await_count == 1
+
+
+async def test_an_unknown_code_with_several_accounts_needs_an_account(hass):
+    first, second = await _two_accounts(hass, [active_sample()], [active_sample()])
+
+    with pytest.raises(ServiceValidationError) as raised:
+        await _call_quiet(hass, {CONF_TRACKING_CODE: UNTRACKED, "contents": "Shoes"})
+
+    assert raised.value.translation_key == "update_contents_entry_required"
+    assert _stored(first, UNTRACKED) is None
+    assert _stored(second, UNTRACKED) is None
+
+
+async def test_a_named_account_stores_even_an_unknown_code(hass):
+    first, second = await _two_accounts(hass, [active_sample()], [active_sample()])
+
+    await _call_quiet(
+        hass,
+        {
+            CONF_TRACKING_CODE: UNTRACKED,
+            "contents": "Shoes",
+            "config_entry_id": second.entry_id,
+        },
+    )
+
+    assert _stored(first, UNTRACKED) is None
+    assert _stored(second, UNTRACKED) == "Shoes"
+
+
+async def test_a_named_account_limits_a_code_both_accounts_list(hass):
+    first, second = await _two_accounts(hass, [active_sample()], [active_sample()])
+
+    await _call_quiet(
+        hass,
+        {
+            CONF_TRACKING_CODE: ACTIVE_CODE,
+            "contents": "Shoes",
+            "config_entry_id": first.entry_id,
+        },
+    )
+
+    assert _stored(first, ACTIVE_CODE) == "Shoes"
+    assert _stored(second, ACTIVE_CODE) is None
+
+
+async def test_a_named_account_that_is_not_loaded_is_refused(hass):
+    await _setup(hass)
+
+    with pytest.raises(ServiceValidationError):
+        await _call_quiet(
+            hass,
+            {
+                CONF_TRACKING_CODE: ACTIVE_CODE,
+                "contents": "Shoes",
+                "config_entry_id": "nope",
+            },
+        )
+
+
+async def test_a_single_account_stores_an_unknown_code_without_naming_it(hass):
+    entry = await _setup(hass)
+
+    await _call_quiet(hass, {CONF_TRACKING_CODE: UNTRACKED, "contents": "Shoes"})
+
+    assert _stored(entry, UNTRACKED) == "Shoes"

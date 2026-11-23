@@ -286,6 +286,10 @@ into public issues.
   straight after normalising, before sorting, events and the delivered split,
   keyed on the code the parcel was requested with (the barcode on an account
   feed).
+- **Several accounts** (credentials build): `update_contents` stores in, and
+  refreshes, every loaded entry whose `coordinator.known_codes` holds the code;
+  none knows it and more than one is loaded raises, unless `config_entry_id`
+  names the entry.
 - **Storage** is one `Store` per config entry (`ContentsStore`, key
   `<domain>.contents.<entry_id>`, 200 codes, oldest dropped first). Nothing goes
   into `options`, so the options flow, its reload and any migration are never

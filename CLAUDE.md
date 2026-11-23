@@ -110,7 +110,11 @@ the standard.
 
 `scripts/contents_translations.json` is the one canonical wording of the
 `contents` service strings, per language code. Implementers never translate:
-`python scripts/apply_contents_translations.py <repo>/custom_components/<domain>/translations --copy-fields <code field>[,<entry field>]`
+`python scripts/apply_contents_translations.py <repo>/custom_components/<domain>/translations --copy-fields <code field>[,<entry field>] [--multi-account]`
 merges it into every translation file (the code and entry fields are copied from
 that file's own `track_parcel`), then `cp translations/en.json strings.json`.
+`--multi-account` (the `--auth credentials` build, one config entry per account)
+also adds the optional `config_entry_id` field and the
+`exceptions.update_contents_entry_required` message; the plain command is
+`... translations --copy-fields tracking_code --multi-account`.
 A language that is not in the table makes the script stop; add it there first.

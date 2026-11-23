@@ -212,7 +212,7 @@ Every payload is the full normalised parcel plus the hub's `device_id`. Events a
 |---|---|---|
 | `example_carrier.track_parcel` | `tracking_code`, `contents` (optional) | Start tracking a parcel, optionally noting what is in it |
 | `example_carrier.untrack_parcel` | `tracking_code` | Stop tracking a parcel |
-| `example_carrier.update_contents` | `tracking_code`, `contents` | Set what is in a parcel, tracked or not; an empty `contents` clears it |
+| `example_carrier.update_contents` | `tracking_code`, `contents` | Set what is in a parcel, tracked or not; an empty `contents` clears it. With several accounts it goes to every account that lists the code; name one with the optional `config_entry_id` (needed for a code no account lists yet) |
 
 ## Examples
 

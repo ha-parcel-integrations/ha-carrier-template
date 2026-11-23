@@ -34,7 +34,7 @@ from .const import (
     STAGGER_MINUTES,
     ParcelStatus,
 )
-from .contents import ContentsStore
+from .contents import ContentsStore, normalize_code
 from .parcels import apply_delivered_filter, normalize_parcel, sort_parcels_by_ts
 
 _LOGGER = logging.getLogger(__name__)
@@ -140,6 +140,9 @@ class ExampleCarrierCoordinator(DataUpdateCoordinator[list[dict]]):
         )
         self._client = client
         self.contents_store = ContentsStore(hass, entry.entry_id)
+        # Every code the account lists, delivered ones past the retention filter
+        # included: update_contents asks which account a code belongs to.
+        self.known_codes: frozenset[str] = frozenset()
         self.delivered: list[dict] = []
         # Consecutive 429 responses, for the exponential backoff in Section 3.
         # Reset to 0 on any success.
@@ -257,6 +260,11 @@ class ExampleCarrierCoordinator(DataUpdateCoordinator[list[dict]]):
         # Events and remembered state cover every parcel; the retention option
         # only limits what the delivered sensor shows.
         tracked = normalized_active + delivered_sorted
+        self.known_codes = frozenset(
+            normalize_code(parcel["barcode"])
+            for parcel in tracked
+            if parcel.get("barcode")
+        )
         self._fire_change_events(tracked)
         self._known_state = {
             parcel["barcode"]: parcel["status"]
