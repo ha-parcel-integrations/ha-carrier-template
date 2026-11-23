@@ -193,6 +193,8 @@ a moment without an end still gets one hour. Once an event can be on dates,
 compare it through `start_datetime_local` / `end_datetime_local`, never
 `start` / `end`: a date does not compare with a datetime.
 
+The event title is `contents`, else `sender`, else the barcode fallback.
+
 ## Tracking-code validation
 
 In code-based carriers (account-based sources have no code entry),
