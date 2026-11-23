@@ -84,6 +84,13 @@ def test_next_delivery_picks_earliest():
     assert sensor.extra_state_attributes["barcode"] == "B"
 
 
+def test_next_delivery_carries_the_contents():
+    parcel = _parcel("A", planned_from="2099-05-01T10:00:00Z")
+    parcel["contents"] = "Running shoes"
+    sensor = ExampleCarrierNextDeliverySensor(_coordinator([parcel]), _entry())
+    assert sensor.extra_state_attributes["contents"] == "Running shoes"
+
+
 def test_next_delivery_skips_a_window_that_has_ended():
     stale = _parcel("A", planned_from=_in(days=-3))
     stale["planned_to"] = _in(days=-2)
