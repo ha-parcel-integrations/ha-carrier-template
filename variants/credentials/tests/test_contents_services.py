@@ -1,5 +1,6 @@
 """Tests for the contents action and the store lifecycle."""
 
+from contextlib import ExitStack
 from datetime import timedelta
 from unittest.mock import AsyncMock, patch
 
@@ -13,7 +14,13 @@ from pytest_homeassistant_custom_component.common import (
     async_fire_time_changed,
 )
 
-from custom_components.example_carrier.const import CONF_TRACKING_CODE, DOMAIN
+from custom_components.example_carrier import parcels as parcels_module
+from custom_components.example_carrier.const import (
+    CONF_DELIVERED_FILTER_AMOUNT,
+    CONF_DELIVERED_FILTER_TYPE,
+    CONF_TRACKING_CODE,
+    DOMAIN,
+)
 from custom_components.example_carrier.coordinator import ExampleCarrierCoordinator
 
 from .payloads import ACTIVE_CODE, DELIVERED_CODE, active_sample, delivered_sample
@@ -21,6 +28,7 @@ from .payloads import ACTIVE_CODE, DELIVERED_CODE, active_sample, delivered_samp
 CLIENT = "custom_components.example_carrier.api.ExampleCarrierApiClient"
 REFRESH = f"{ExampleCarrierCoordinator.__module__}.ExampleCarrierCoordinator"
 UNTRACKED = "EXAMPLE555555"
+COORDINATOR = ExampleCarrierCoordinator.__module__
 STORE_KEY = f"{DOMAIN}.contents.%s"
 
 
@@ -111,16 +119,44 @@ async def test_update_contents_works_for_a_parcel_not_in_the_account_yet(hass):
     )
 
 
-async def test_update_contents_refreshes_only_when_something_changed(hass):
+async def test_update_contents_requests_no_refresh(hass):
     await _setup(hass)
     data = {CONF_TRACKING_CODE: ACTIVE_CODE, "contents": "Running shoes"}
-    with patch(f"{REFRESH}.async_request_refresh", new=AsyncMock()) as refresh:
-        await _call(hass, data)
-        assert refresh.await_count == 1
-        await _call(hass, data)
-        assert refresh.await_count == 1
-        await _call(hass, {CONF_TRACKING_CODE: UNTRACKED})
-        assert refresh.await_count == 1
+    with (
+        patch(f"{REFRESH}.async_request_refresh", new=AsyncMock()) as refresh,
+        patch(f"{CLIENT}.async_get_parcels", new=AsyncMock()) as fetch,
+    ):
+        await hass.services.async_call(DOMAIN, "update_contents", data, blocking=True)
+        await hass.services.async_call(DOMAIN, "update_contents", data, blocking=True)
+        await hass.services.async_call(
+            DOMAIN, "update_contents", {CONF_TRACKING_CODE: UNTRACKED}, blocking=True
+        )
+        await hass.async_block_till_done()
+        async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=30))
+        await hass.async_block_till_done()
+    refresh.assert_not_called()
+    fetch.assert_not_called()
+
+
+async def test_listeners_fire_once_per_real_change(hass):
+    entry = await _setup(hass)
+    coordinator = entry.runtime_data.coordinator
+    data = {CONF_TRACKING_CODE: ACTIVE_CODE, "contents": "Running shoes"}
+    with patch.object(
+        coordinator, "async_update_listeners", wraps=coordinator.async_update_listeners
+    ) as listeners:
+        await hass.services.async_call(DOMAIN, "update_contents", data, blocking=True)
+        assert listeners.call_count == 1
+        await hass.services.async_call(DOMAIN, "update_contents", data, blocking=True)
+        assert listeners.call_count == 1
+        await hass.services.async_call(
+            DOMAIN, "update_contents", {CONF_TRACKING_CODE: UNTRACKED}, blocking=True
+        )
+        assert listeners.call_count == 1
+        await hass.services.async_call(
+            DOMAIN, "update_contents", {CONF_TRACKING_CODE: ACTIVE_CODE}, blocking=True
+        )
+        assert listeners.call_count == 2
 
 
 async def test_update_contents_rejects_an_empty_code(hass):
@@ -212,11 +248,31 @@ async def _two_accounts(hass, first_parcels, second_parcels):
     return first, second
 
 
-async def _call_quiet(hass, data: dict) -> AsyncMock:
-    with patch(f"{REFRESH}.async_request_refresh", new=AsyncMock()) as refresh:
+async def _call_quiet(hass, data: dict, *entries: MockConfigEntry) -> list[int]:
+    """Call the action without any refresh; return each entry's listener count."""
+    coordinators = [entry.runtime_data.coordinator for entry in entries]
+    with ExitStack() as stack:
+        refresh = stack.enter_context(
+            patch(f"{REFRESH}.async_request_refresh", new=AsyncMock())
+        )
+        fetch = stack.enter_context(
+            patch(f"{CLIENT}.async_get_parcels", new=AsyncMock())
+        )
+        listeners = [
+            stack.enter_context(
+                patch.object(
+                    coordinator,
+                    "async_update_listeners",
+                    wraps=coordinator.async_update_listeners,
+                )
+            )
+            for coordinator in coordinators
+        ]
         await hass.services.async_call(DOMAIN, "update_contents", data, blocking=True)
         await hass.async_block_till_done()
-    return refresh
+    refresh.assert_not_called()
+    fetch.assert_not_called()
+    return [mock.call_count for mock in listeners]
 
 
 async def test_several_accounts_store_in_the_one_that_lists_the_code(hass):
@@ -224,13 +280,13 @@ async def test_several_accounts_store_in_the_one_that_lists_the_code(hass):
         hass, [active_sample()], [active_sample(OTHER_CODE)]
     )
 
-    refresh = await _call_quiet(
-        hass, {CONF_TRACKING_CODE: OTHER_CODE, "contents": "Shoes"}
+    changed = await _call_quiet(
+        hass, {CONF_TRACKING_CODE: OTHER_CODE, "contents": "Shoes"}, first, second
     )
 
     assert _stored(first, OTHER_CODE) is None
     assert _stored(second, OTHER_CODE) == "Shoes"
-    assert refresh.await_count == 1
+    assert changed == [0, 1]
 
 
 async def test_several_accounts_find_a_delivered_parcel(hass):
@@ -245,25 +301,25 @@ async def test_several_accounts_find_a_delivered_parcel(hass):
 async def test_a_code_in_two_accounts_is_stored_in_both(hass):
     first, second = await _two_accounts(hass, [active_sample()], [active_sample()])
 
-    refresh = await _call_quiet(
-        hass, {CONF_TRACKING_CODE: ACTIVE_CODE, "contents": "Shoes"}
+    changed = await _call_quiet(
+        hass, {CONF_TRACKING_CODE: ACTIVE_CODE, "contents": "Shoes"}, first, second
     )
 
     assert _stored(first, ACTIVE_CODE) == "Shoes"
     assert _stored(second, ACTIVE_CODE) == "Shoes"
-    assert refresh.await_count == 2
+    assert changed == [1, 1]
 
 
-async def test_several_accounts_refresh_only_where_the_value_changed(hass):
+async def test_several_accounts_notify_only_where_the_value_changed(hass):
     first, second = await _two_accounts(hass, [active_sample()], [active_sample()])
     first.runtime_data.coordinator.contents_store.async_set(ACTIVE_CODE, "Shoes")
 
-    refresh = await _call_quiet(
-        hass, {CONF_TRACKING_CODE: ACTIVE_CODE, "contents": "Shoes"}
+    changed = await _call_quiet(
+        hass, {CONF_TRACKING_CODE: ACTIVE_CODE, "contents": "Shoes"}, first, second
     )
 
     assert _stored(second, ACTIVE_CODE) == "Shoes"
-    assert refresh.await_count == 1
+    assert changed == [0, 1]
 
 
 async def test_an_unknown_code_with_several_accounts_needs_an_account(hass):
@@ -329,3 +385,83 @@ async def test_a_single_account_stores_an_unknown_code_without_naming_it(hass):
     await _call_quiet(hass, {CONF_TRACKING_CODE: UNTRACKED, "contents": "Shoes"})
 
     assert _stored(entry, UNTRACKED) == "Shoes"
+
+
+async def test_reapply_reaches_delivered_parcels(hass):
+    entry = _config_entry()
+    # Keep the (old) delivered parcel visible whatever today's date is.
+    entry.add_to_hass(hass)
+    hass.config_entries.async_update_entry(
+        entry,
+        options={
+            CONF_DELIVERED_FILTER_TYPE: "parcels",
+            CONF_DELIVERED_FILTER_AMOUNT: 5,
+        },
+    )
+    entry = await _setup(hass, entry, [active_sample(), delivered_sample()])
+    coordinator = entry.runtime_data.coordinator
+    assert coordinator.delivered
+
+    for code in (ACTIVE_CODE, DELIVERED_CODE):
+        await hass.services.async_call(
+            DOMAIN,
+            "update_contents",
+            {CONF_TRACKING_CODE: code, "contents": f"Note {code}"},
+            blocking=True,
+        )
+
+    published = [*coordinator.data, *coordinator.delivered]
+    assert len(published) == 2
+    for parcel in published:
+        assert parcel["contents"] == f"Note {parcel['barcode']}"
+
+
+async def test_a_parcel_without_a_barcode_keeps_the_carriers_contents(hass):
+    real = parcels_module.normalize_parcel
+
+    def barcode_less(raw, **kwargs):
+        return {**real(raw, **kwargs), "barcode": None, "contents": "Carrier text"}
+
+    with patch(f"{COORDINATOR}.normalize_parcel", side_effect=barcode_less):
+        entry = await _setup(hass)
+        coordinator = entry.runtime_data.coordinator
+        await hass.services.async_call(
+            DOMAIN,
+            "update_contents",
+            {CONF_TRACKING_CODE: ACTIVE_CODE, "contents": "Running shoes"},
+            blocking=True,
+        )
+        assert coordinator.data[0]["barcode"] is None
+        assert coordinator.data[0]["contents"] == "Carrier text"
+
+        with patch(
+            f"{CLIENT}.async_get_parcels",
+            new=AsyncMock(return_value=[active_sample()]),
+        ):
+            await coordinator.async_refresh()
+        assert coordinator.data[0]["contents"] == "Carrier text"
+
+
+async def test_the_carriers_own_contents_survive_a_reapply(hass):
+    real = parcels_module.normalize_parcel
+
+    def carrier_text(raw, **kwargs):
+        return {**real(raw, **kwargs), "contents": "Carrier text"}
+
+    with patch(f"{COORDINATOR}.normalize_parcel", side_effect=carrier_text):
+        entry = await _setup(hass)
+    coordinator = entry.runtime_data.coordinator
+    assert coordinator.data[0]["contents"] == "Carrier text"
+
+    await hass.services.async_call(
+        DOMAIN,
+        "update_contents",
+        {CONF_TRACKING_CODE: ACTIVE_CODE, "contents": "Running shoes"},
+        blocking=True,
+    )
+    assert coordinator.data[0]["contents"] == "Running shoes"
+
+    await hass.services.async_call(
+        DOMAIN, "update_contents", {CONF_TRACKING_CODE: ACTIVE_CODE}, blocking=True
+    )
+    assert coordinator.data[0]["contents"] == "Carrier text"

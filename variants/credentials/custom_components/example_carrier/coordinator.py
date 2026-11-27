@@ -11,7 +11,7 @@ import hashlib
 import logging
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -144,6 +144,12 @@ class ExampleCarrierCoordinator(DataUpdateCoordinator[list[dict]]):
         # included: update_contents asks which account a code belongs to.
         self.known_codes: frozenset[str] = frozenset()
         self.delivered: list[dict] = []
+        # id(published parcel) -> the barcode its contents are stored under,
+        # rebuilt every poll.
+        self._parcel_codes: dict[int, str] = {}
+        # id(published parcel) -> the contents the carrier itself reported,
+        # kept so a re-apply can fall back to it once the user's text is gone.
+        self._carrier_contents: dict[int, str | None] = {}
         # Consecutive 429 responses, for the exponential backoff in Section 3.
         # Reset to 0 on any success.
         self._consecutive_429 = 0
@@ -164,13 +170,22 @@ class ExampleCarrierCoordinator(DataUpdateCoordinator[list[dict]]):
         # Timestamp of the last successful poll (diagnostic sensor).
         self.last_success_time: datetime | None = None
 
-    def _apply_contents(self, parcel: dict) -> dict:
+    def _apply_contents(self, parcel: dict, code: str) -> dict:
         """Put the user's own contents text over the carrier's, when there is one."""
-        barcode = parcel.get("barcode")
-        user_value = self.contents_store.get(barcode) if barcode else None
+        user_value = self.contents_store.get(code) if code else None
         if user_value is not None:
             parcel["contents"] = user_value
         return parcel
+
+    @callback
+    def async_reapply_contents(self) -> None:
+        """Re-read the contents store into the published parcels, without a poll."""
+        for parcels in (self.data or [], self.delivered):
+            for parcel in parcels:
+                code = self._parcel_codes.get(id(parcel), parcel.get("barcode") or "")
+                parcel["contents"] = self._carrier_contents.get(id(parcel))
+                self._apply_contents(parcel, code)
+        self.async_update_listeners()
 
     @property
     def current_tier_minutes(self) -> int | None:
@@ -245,9 +260,16 @@ class ExampleCarrierCoordinator(DataUpdateCoordinator[list[dict]]):
 
         include_history = self._include_history
         normalized = [
-            self._apply_contents(normalize_parcel(raw, include_history=include_history))
-            for raw in raws
+            normalize_parcel(raw, include_history=include_history) for raw in raws
         ]
+        # Taken before the user's text goes on top, so clearing it later can
+        # restore what the carrier said.
+        self._carrier_contents = {
+            id(parcel): parcel.get("contents") for parcel in normalized
+        }
+        self._parcel_codes = {id(p): p.get("barcode") or "" for p in normalized}
+        for parcel in normalized:
+            self._apply_contents(parcel, self._parcel_codes[id(parcel)])
         active = [parcel for parcel in normalized if not parcel["delivered"]]
         delivered = [parcel for parcel in normalized if parcel["delivered"]]
 

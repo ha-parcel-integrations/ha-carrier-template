@@ -280,18 +280,30 @@ into public issues.
 `contents` is a short string describing what is in the parcel, right after
 `receiver` in every normaliser, `None` when unknown, never `""`. Three rules:
 
-- **Precedence**: the user's value (set with `update_contents`, or the optional
-  `contents` field on `track_parcel`) beats a label the user gave the parcel in
-  the carrier's own account, which beats the carrier's own item text.
-  `normalize_parcel` stays pure and fills only the last two, through
-  `clean_contents` / `join_contents`; the coordinator overlays the user's value
-  straight after normalising, before sorting, events and the delivered split,
-  keyed on the code the parcel was requested with (the barcode on an account
-  feed).
+- **Precedence**: user > carrier > `None`. The user's value (set with
+  `update_contents`, or the optional `contents` field on `track_parcel`) beats a
+  label the user gave the parcel in the carrier's own account, which beats the
+  carrier's own item text. `normalize_parcel` stays pure and fills only the last
+  two, through `clean_contents` / `join_contents`; the coordinator overlays the
+  user's value straight after normalising, before sorting, events and the
+  delivered split, keyed on the code the parcel was requested with (the barcode
+  on an account feed).
+- **A change never polls the carrier.** The coordinator keeps
+  `_parcel_codes` (`id(parcel)` -> that key) and `_carrier_contents`
+  (`id(parcel)` -> what the carrier itself said, taken before the overlay), both
+  rebuilt every poll. `async_reapply_contents()` is a sync callback: it resets
+  `contents` to the carrier's value on every parcel in every list the coordinator
+  publishes (`data`, `delivered`, and `outgoing` / `delivered_outgoing` where the
+  carrier has them), overlays the store again and calls
+  `async_update_listeners()` once. `update_contents` and the already-tracked
+  branch of `track_parcel` call it, without `await`, only when the store reports
+  a change. A carrier that fills `contents` itself must keep that value
+  surviving a cleared user value; a newly tracked code still refreshes through
+  the options listener.
 - **Several accounts** (credentials build): `update_contents` stores in, and
-  refreshes, every loaded entry whose `coordinator.known_codes` holds the code;
-  none knows it and more than one is loaded raises, unless `config_entry_id`
-  names the entry.
+  re-applies on, every loaded entry whose `coordinator.known_codes` holds the
+  code; none knows it and more than one is loaded raises, unless
+  `config_entry_id` names the entry.
 - **Storage** is one `Store` per config entry (`ContentsStore`, key
   `<domain>.contents.<entry_id>`, 200 codes, oldest dropped first). Nothing goes
   into `options`, so the options flow, its reload and any migration are never

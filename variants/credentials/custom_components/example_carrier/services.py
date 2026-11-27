@@ -70,7 +70,7 @@ def async_setup_services(hass: HomeAssistant) -> None:
             if coordinator.contents_store.async_set(
                 tracking_code, call.data.get(CONF_CONTENTS)
             ):
-                await coordinator.async_request_refresh()
+                coordinator.async_reapply_contents()
 
     hass.services.async_register(
         DOMAIN,

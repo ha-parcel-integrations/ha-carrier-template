@@ -14,7 +14,7 @@ import logging
 
 import aiohttp
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
@@ -153,6 +153,13 @@ class ExampleCarrierCoordinator(DataUpdateCoordinator[list[dict]]):
         self._client = client
         self.contents_store = ContentsStore(hass, entry.entry_id)
         self.delivered: list[dict] = []
+        # id(published parcel) -> the code it was requested with: the contents
+        # store is keyed on that, and a response may carry another barcode or
+        # none at all. Rebuilt every poll.
+        self._parcel_codes: dict[int, str] = {}
+        # id(published parcel) -> the contents the carrier itself reported,
+        # kept so a re-apply can fall back to it once the user's text is gone.
+        self._carrier_contents: dict[int, str | None] = {}
         # tracking_code -> last successful raw payload, so a transient fetch
         # failure or a not-found blip keeps the parcel visible instead of
         # dropping its sensor. Lives for the integration's lifetime (resets on
@@ -194,6 +201,16 @@ class ExampleCarrierCoordinator(DataUpdateCoordinator[list[dict]]):
         if user_value is not None:
             parcel["contents"] = user_value
         return parcel
+
+    @callback
+    def async_reapply_contents(self) -> None:
+        """Re-read the contents store into the published parcels, without a poll."""
+        for parcels in (self.data or [], self.delivered):
+            for parcel in parcels:
+                code = self._parcel_codes.get(id(parcel), parcel.get("barcode") or "")
+                parcel["contents"] = self._carrier_contents.get(id(parcel))
+                self._apply_contents(parcel, code)
+        self.async_update_listeners()
 
     @property
     def current_tier_minutes(self) -> int | None:
@@ -355,15 +372,19 @@ class ExampleCarrierCoordinator(DataUpdateCoordinator[list[dict]]):
             raise UpdateFailed("Example Carrier unreachable for all tracked parcels")
 
         include_history = self._include_history
-        entries = [
-            (
-                code,
-                self._apply_contents(
-                    normalize_parcel(raw, include_history=include_history), code
-                ),
-            )
+        normalized = [
+            (code, normalize_parcel(raw, include_history=include_history))
             for code, raw in raws_by_code.items()
         ]
+        # Taken before the user's text goes on top, so clearing it later can
+        # restore what the carrier said.
+        self._carrier_contents = {
+            id(parcel): parcel.get("contents") for _, parcel in normalized
+        }
+        entries = [
+            (code, self._apply_contents(parcel, code)) for code, parcel in normalized
+        ]
+        self._parcel_codes = {id(parcel): code for code, parcel in entries}
         active = [parcel for _, parcel in entries if not parcel["delivered"]]
         delivered = [parcel for _, parcel in entries if parcel["delivered"]]
         # Rebuilt fresh from this cycle's data — a code whose payload just
