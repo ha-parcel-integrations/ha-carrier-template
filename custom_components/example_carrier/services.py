@@ -91,8 +91,11 @@ def async_setup_services(hass: HomeAssistant) -> None:
     async def _untrack(call: ServiceCall) -> None:
         tracking_code = normalize_tracking_code(call.data[CONF_TRACKING_CODE])
         entry = _resolve_entry(hass)
-        if (store := _contents_store(entry)) is not None:
-            store.async_set(tracking_code, None)
+        if (store := _contents_store(entry)) is None:
+            # The text is still on disk and would return when the code is re-tracked.
+            store = ContentsStore(hass, entry.entry_id)
+            await store.async_load()
+        store.async_set(tracking_code, None)
         current = entry.options.get(CONF_PARCELS, [])
         kept = [p for p in current if p[CONF_TRACKING_CODE] != tracking_code]
         if len(kept) != len(current):

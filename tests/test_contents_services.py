@@ -260,6 +260,38 @@ async def test_untrack_parcel_drops_the_contents(hass):
     assert entry.options[CONF_PARCELS] == []
 
 
+async def test_untrack_while_not_loaded_forgets_the_contents(hass, hass_storage):
+    entry = await _setup(hass, [ACTIVE_CODE])
+    await _call(
+        hass,
+        "update_contents",
+        {CONF_TRACKING_CODE: ACTIVE_CODE, "contents": "Running shoes"},
+    )
+    store = entry.runtime_data.coordinator.contents_store
+    await store._store.async_save(store._data_to_save())
+    key = STORE_KEY % entry.entry_id
+
+    entry.mock_state(hass, ConfigEntryState.SETUP_RETRY)
+    await hass.services.async_call(
+        DOMAIN, "untrack_parcel", {CONF_TRACKING_CODE: ACTIVE_CODE}, blocking=True
+    )
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=60))
+    await hass.async_block_till_done()
+
+    assert entry.options[CONF_PARCELS] == []
+    assert "Running shoes" not in str(hass_storage[key])
+
+    entry.mock_state(hass, ConfigEntryState.LOADED)
+    assert await hass.config_entries.async_unload(entry.entry_id)
+    with patch(
+        f"{CLIENT}.async_get_parcel", new=AsyncMock(return_value=active_sample())
+    ):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+    await _call(hass, "track_parcel", {CONF_TRACKING_CODE: ACTIVE_CODE})
+    assert _contents(entry, ACTIVE_CODE) is None
+
+
 async def test_a_stored_value_survives_a_restart_of_the_entry(hass, hass_storage):
     entry = await _setup(hass, [ACTIVE_CODE])
     await _call(
